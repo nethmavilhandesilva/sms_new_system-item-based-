@@ -6,10 +6,6 @@ use Illuminate\Database\Eloquent\Model; // <-- ADDED: Import the base Model clas
 
 class GrnEntry extends Model
 {
-    // If your table name is not 'grn_entries', specify it here:
-    // protected $table = 'your_grn_entries_table_name';
-    // By convention, Laravel will assume your table name is 'grn_entries' (plural of GrnEntry)
-
     protected $fillable = [
         'auto_purchase_no',
         'code',
@@ -24,15 +20,17 @@ class GrnEntry extends Model
         'original_packs',
         'original_weight',
         'sequence_no',
-         'is_hidden' ,
-         'total_grn',
-         'PerKGPrice',
+        'is_hidden',
+        'total_grn',
+        'PerKGPrice',
         'wasted_packs',
         'wasted_weight',
         'total_wasted_weight',
-         'show_status',
-          'grn_status', 
-          'SalesKGPrice'
+        'show_status',
+        'grn_status',
+        'SalesKGPrice',
+        'BP',
+        'Real_Supplier_code',
     ];
 
     // Optional: If you don't want timestamps (created_at, updated_at)

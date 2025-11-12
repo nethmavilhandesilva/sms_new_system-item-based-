@@ -95,7 +95,15 @@
 
         {{-- Filters Summary --}}
         <div class="mb-3 text-white">
-            <strong>තෝරාගත් GRN කේතය:</strong> {{ $selectedGrnCode }}
+           <span>
+    <strong>තෝරාගත් GRN කේතය:</strong> {{ $selectedGrnCode }}
+    @if($selectedGrnEntry)
+        <span class="ms-2">
+            ({{ $selectedGrnEntry->item_code }} - {{ $selectedGrnEntry->item_name }})
+        </span>
+    @endif
+</span>
+
             @if($startDate && $endDate)
                 <span class="ms-3"><strong>දිනයන්:</strong> {{ $startDate }} සිට {{ $endDate }} දක්වා</span>
             @elseif($startDate)

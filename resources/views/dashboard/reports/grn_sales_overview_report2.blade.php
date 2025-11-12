@@ -128,8 +128,8 @@
         @php
             $originalPacks = floatval($data['original_packs'] ?? 0);
             $originalWeight = floatval($data['original_weight'] ?? 0);
-            $soldPacks = floatval($data['totalSoldpacks'] ?? 0);
-            $soldWeight = floatval($data['totalSoldWeight'] ?? 0);
+            $soldPacks = floatval($data['sold_packs'] ?? 0);
+            $soldWeight = floatval($data['sold_weight'] ?? 0);
             $remainingPacks = floatval($data['remaining_packs'] ?? 0);
             $remainingWeight = floatval($data['remaining_weight'] ?? 0);
             $salesValue = floatval($data['total_sales_value'] ?? 0);
@@ -150,11 +150,10 @@
             <td>{{ number_format($soldPacks) }}</td>
             <td>{{ number_format($remainingWeight, 2) }}</td>
             <td>{{ number_format($remainingPacks) }}</td>
-            
         </tr>
     @empty
         <tr>
-            <td colspan="8" class="text-center text-muted py-4">දත්ත නොමැත.</td>
+            <td colspan="7" class="text-center text-muted py-4">දත්ත නොමැත.</td>
         </tr>
     @endforelse
 
@@ -167,25 +166,20 @@
         <td><strong>{{ number_format($grandTotalSoldPacks) }}</strong></td>
         <td><strong>{{ number_format($grandTotalRemainingWeight, 2) }}</strong></td>
         <td><strong>{{ number_format($grandTotalRemainingPacks) }}</strong></td>
-       
     </tr>
 </tbody>
-
                 </table>
             </div>
         </div>
     </div>
 </div>
 
-<div class="mt-3">
-    <a href="{{ route('grn-overview.download2', ['format' => 'excel']) }}" class="btn btn-success me-2">Download Excel</a>
-    <a href="{{ route('grn-overview.download2', ['format' => 'pdf']) }}" class="btn btn-danger">Download PDF</a>
+ <div class="mt-3">
+    <a href="{{ route('grn-overview.download2', ['format' => 'pdf', 'supplier_code' => request('supplier_code')]) }}" 
+       class="btn btn-danger btn-sm">📄 Download PDF</a>
 
-    {{-- New form for the email button --}}
-    <form action="{{ route('report.email.overview-report') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit" class="btn btn-info">📧 Email Report</button>
-    </form>
+    <a href="{{ route('grn-overview.download2', ['format' => 'excel', 'supplier_code' => request('supplier_code')]) }}" 
+       class="btn btn-success btn-sm">📊 Download Excel</a>
 </div>
 
 {{-- Custom Styles --}}

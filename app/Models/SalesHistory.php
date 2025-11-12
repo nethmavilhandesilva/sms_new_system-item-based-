@@ -33,5 +33,6 @@ class SalesHistory extends Model
         'UniqueCode',
         'created_at',
         'updated_at',
+        'Date',
     ];
 }

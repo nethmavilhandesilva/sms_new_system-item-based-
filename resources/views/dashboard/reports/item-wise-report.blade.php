@@ -113,7 +113,7 @@
                     <th>බර (kg)</th>
                     <th>මිල (Rs/kg)</th>
                     <th>එකතුව (Rs)</th>
-                    <th>ගෙණුම්කරු</th>
+                     <th>ගැණුම්කරු</th>
                     <th>GRN අංකය</th>
                 </tr>
             </thead>

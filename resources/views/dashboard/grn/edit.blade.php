@@ -43,7 +43,6 @@
         border-color: #545b62; 
     }
     .text-end { text-align: right; }
-    .password-protected { display: none; }
 </style>
 
 <div class="form-card p-4 shadow-sm rounded bg-light">
@@ -54,9 +53,17 @@
         @method('PUT')
 
         <div class="row g-3">
+            {{-- ✅ Editable GRN Code --}}
+            <div class="col-md-3">
+                <label for="code" class="form-label">GRN කේතය (Code)</label>
+                <input type="text" name="code" id="code"
+                       class="form-control form-control-sm text-uppercase"
+                       value="{{ old('code', $entry->code) }}"
+                       style="text-transform: uppercase;">
+            </div>
 
-            {{-- Item Selection --}}
-            <div class="col-md-4">
+            {{-- Item Code --}}
+            <div class="col-md-3">
                 <label for="item_code" class="form-label">භාණ්ඩය (Item)</label>
                 <select name="item_code" id="item_code" class="form-select form-select-sm" required>
                     @foreach($items as $item)
@@ -67,15 +74,16 @@
                 </select>
             </div>
 
-            <div class="col-md-4">
+            {{-- Item Name --}}
+            <div class="col-md-3">
                 <label for="item_name" class="form-label">භාණ්ඩ නාමය</label>
                 <input type="text" name="item_name" id="item_name" 
                        class="form-control form-control-sm" 
-                       value="{{ $entry->item_name }}" required>
+                       value="{{ $entry->item_name }}">
             </div>
 
             {{-- Supplier --}}
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="supplier_name" class="form-label">සැපයුම්කරු <span class="text-danger">*</span></label>
                 <input list="suppliers_list" id="supplier_name" name="supplier_code"
                        class="form-control form-control-sm @error('supplier_code') is-invalid @enderror" required
@@ -96,34 +104,36 @@
                 @enderror
             </div>
 
-            {{-- GRN & Warehouse --}}
+            {{-- GRN No --}}
             <div class="col-md-3">
                 <label for="grn_no" class="form-label">GRN අංකය</label>
                 <input type="text" name="grn_no" id="grn_no" 
                        class="form-control form-control-sm" 
-                       value="{{ $entry->grn_no }}" required>
+                       value="{{ $entry->grn_no }}">
             </div>
 
+            {{-- Warehouse No --}}
             <div class="col-md-3">
                 <label for="warehouse_no" class="form-label">ගබඩා අංකය</label>
                 <input type="text" name="warehouse_no" id="warehouse_no" 
                        class="form-control form-control-sm" 
-                       value="{{ $entry->warehouse_no }}" required>
+                       value="{{ $entry->warehouse_no }}">
             </div>
 
-            {{-- Packs & Weight --}}
+            {{-- Packs --}}
             <div class="col-md-3">
                 <label for="packs" class="form-label">පැක්</label>
                 <input type="number" name="packs" id="packs" 
                        class="form-control form-control-sm" 
-                       value="{{ $entry->packs }}" required>
+                       value="{{ $entry->packs }}">
             </div>
 
+            {{-- Weight --}}
             <div class="col-md-3">
                 <label for="weight" class="form-label">බර (kg) <span class="text-danger">*</span></label>
                 <input type="number" id="weight" name="weight" 
                        class="form-control form-control-sm" 
-                       value="{{ old('weight', $entry->weight) }}" step="0.01" min="0.01" required>
+                       value="{{ old('weight', $entry->weight) }}">
             </div>
 
             {{-- Transaction Date --}}
@@ -131,7 +141,7 @@
                 <label for="txn_date" class="form-label">ගනුදෙනු දිනය</label>
                 <input type="date" name="txn_date" id="txn_date" 
                        class="form-control form-control-sm" 
-                       value="{{ $entry->txn_date }}" required>
+                       value="{{ $entry->txn_date }}">
             </div>
 
             {{-- Total GRN --}}
@@ -147,9 +157,17 @@
                 <label for="per_kg_price" class="form-label">Per KG Price</label>
                 <input type="number" id="per_kg_price" name="per_kg_price" 
                        class="form-control form-control-sm" 
-                       value="{{ old('per_kg_price', $entry->per_kg_price) }}" step="0.01" readonly>
+                       value="{{ old('per_kg_price', $entry->PerKGPrice) }}" step="0.01">
             </div>
 
+            {{-- ✅ BP Field --}}
+            <div class="col-md-4">
+                <label for="BP" class="form-label">BP</label>
+                <input type="number" id="BP" name="BP" 
+                       class="form-control form-control-sm" 
+                       value="{{ old('BP', $entry->BP) }}" 
+                       step="0.01">
+            </div>
         </div>
 
         {{-- Buttons --}}
@@ -164,37 +182,15 @@
     </form>
 </div>
 
-
 @endsection
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const passwordField = document.getElementById('edit_password');
-    const totalGrnField = document.getElementById('total_grn_field');
-    const perKgField = document.getElementById('per_kg_price_field');
-    const correctPassword = 'nethma123';
-
-    passwordField.addEventListener('input', function () {
-        if(passwordField.value === correctPassword){
-            totalGrnField.style.display = 'block';
-            perKgField.style.display = 'block';
-            passwordField.style.backgroundColor = '#d4edda';
-            passwordField.style.borderColor = '#28a745';
-        } else {
-            totalGrnField.style.display = 'none';
-            perKgField.style.display = 'none';
-            passwordField.style.backgroundColor = '';
-            passwordField.style.borderColor = '';
-        }
-    });
-});
-</script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const totalGrnInput = document.getElementById('total_grn');
     const weightInput = document.getElementById('weight');
     const perKgInput = document.getElementById('per_kg_price');
+    const bpInput = document.getElementById('BP');
 
     function calculatePerKg() {
         const totalGrn = parseFloat(totalGrnInput.value) || 0;
@@ -202,9 +198,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (totalGrn > 0 && weight > 0) {
             const perKg = (totalGrn / weight).toFixed(2);
-            perKgInput.value = perKg; // auto-type in field
+            perKgInput.value = perKg;
+            bpInput.value = perKg; // ✅ Optional: auto-fill BP same as per kg
         } else {
             perKgInput.value = '';
+            bpInput.value = '';
         }
     }
 
@@ -212,5 +210,5 @@ document.addEventListener('DOMContentLoaded', function () {
     weightInput.addEventListener('input', calculatePerKg);
 });
 </script>
-
 @endpush
+

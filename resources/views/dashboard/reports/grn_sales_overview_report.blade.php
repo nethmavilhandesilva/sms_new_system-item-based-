@@ -166,11 +166,10 @@
 </div>
 
 <div class="mt-3">
-    <a href="{{ route('grn-sales.download', ['reportType' => 'supplier-sales', 'format' => 'excel']) }}" class="btn btn-success me-2">Download Excel</a>
-    <a href="{{ route('grn-sales.download', ['reportType' => 'supplier-sales', 'format' => 'pdf']) }}" class="btn btn-danger">Download PDF</a>
-    <form action="{{ route('report.email.supplier-sales') }}" method="POST" style="display:inline;">
-        @csrf
-        <button type="submit" class="btn btn-info">📧 Email Report</button>
-    </form>
+    <a href="{{ route('report.download.grn.sales.overview', ['format' => 'pdf', 'supplier_code' => request('supplier_code')]) }}" 
+       class="btn btn-danger btn-sm">📄 Download PDF</a>
+
+    <a href="{{ route('report.download.grn.sales.overview', ['format' => 'excel', 'supplier_code' => request('supplier_code')]) }}" 
+       class="btn btn-success btn-sm">📊 Download Excel</a>
 </div>
 @endsection

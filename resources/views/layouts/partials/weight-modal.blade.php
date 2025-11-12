@@ -4,6 +4,7 @@
             @csrf
             <div class="modal-content" style="background-color: #99ff99;">
                 <div class="modal-header">
+                    <h5 class="modal-title" id="weight_modal_label" style="font-weight: bold; color: black;">වාර්තා</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -17,10 +18,21 @@
                         </div>
                     @endif
                     
+                    <!-- Supplier Code Dropdown - Always visible -->
+                    <div class="mb-3">
+                        <label for="supplier_code" class="form-label" style="font-weight: bold; color: black;">Supplier Code</label>
+                        <select name="supplier_code" id="supplier_code" class="form-control">
+                            <option value="">All Suppliers</option>
+                            <option value="L">L</option>
+                            <option value="A">A</option>
+                        </select>
+                    </div>
+                    
                     <div class="mb-3">
                         <label for="weight_password_field" class="form-label" style="font-weight: bold; color: black;">මුරපදය ඇතුලත් කරන්න</label>
                         <input type="password" id="weight_password_field" class="form-control" placeholder="මුරපදය">
                     </div>
+                    
                     <div id="weight_date_range_fields" style="display: none;">
                         <div class="mb-3">
                             <label for="weight_start_date" class="form-label" style="font-weight: bold; color: black;">ආරම්භ දිනය</label>
@@ -35,28 +47,22 @@
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary w-100">වාර්තාව ලබාගන්න</button>
                 </div>
-                  <div class="mt-3">
-        {{-- New button to send the daily report --}}
-        <a href="{{ route('report.email.daily') }}" class="btn btn-info">
-            📧 Daily Email Report
-        </a>
-    </div>
+                <div class="mt-3 text-center">
+                    <a href="{{ route('report.email.daily') }}" class="btn btn-info">
+                        📧 Daily Email Report
+                    </a>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
----
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const passwordField = document.getElementById('weight_password_field');
         const dateRangeFields = document.getElementById('weight_date_range_fields');
         const correctPassword = 'nethma123';
         
-        // Use an ID selector to be specific
         const weightModal = document.querySelector('#weight_modal');
 
         if (passwordField && dateRangeFields) {
@@ -78,4 +84,3 @@
         }
     });
 </script>
-

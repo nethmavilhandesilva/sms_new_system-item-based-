@@ -36,7 +36,10 @@
         border: 1px solid #ced4da;
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
         resize: vertical;
-        min-height: 100px;
+    }
+
+    textarea.form-control {
+        min-height: 80px;
     }
 
     .form-control:focus,
@@ -92,6 +95,22 @@
         <div class="mb-3">
             <label for="address_field" class="form-label">ලිපිනය (Address)</label>
             <textarea id="address_field" name="address" class="form-control" required>{{ $supplier->address }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="phone_field" class="form-label">දුරකථන අංකය (Phone Number)</label>
+            <input type="text" id="phone_field" name="phone" value="{{ $supplier->phone }}" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label for="email_field" class="form-label">ඊමේල් (Email Address)</label>
+            <input type="email" id="email_field" name="email" value="{{ $supplier->email }}" class="form-control">
+        </div>
+
+        {{-- NEW FIELD ADDED HERE --}}
+        <div class="mb-3">
+            <label for="account_no_field" class="form-label">ගිණුම් අංකය (Account No)</label>
+            <input type="text" id="account_no_field" name="account_no" value="{{ $supplier->account_no }}" class="form-control">
         </div>
 
         <div class="text-center mt-4">

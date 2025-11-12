@@ -175,6 +175,10 @@
                         <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#codeSelectModal">
                             GRN වාර්තාව
                         </a>
+                         <a class="dropdown-item" href="{{ route('loan.report') }}">Final Loan Report</a>
+                         <a class="dropdown-item" href="{{ route('expenses.report') }}">වි‍යදම් වාර්තාව</a>
+                          <a class="dropdown-item" href="supplierSelectModal2" data-bs-toggle="modal" data-bs-target="#supplierSelectModal2">
+                               සියලු දින අනුව GRN වාර්තාව</a>
                     </div>
                 </div>
 
@@ -259,7 +263,7 @@
                 </div>
                 <div class="nav-item">
                     <a href="#" data-bs-toggle="modal" data-bs-target="#grnSaleReportModal" class="nav-link-custom">
-                        මිල එක්තුකරණය
+                         මිල එකතුව 
                     </a>
                 </div>
                 <div class="nav-item">
@@ -267,16 +271,22 @@
                         වෙනස් කිරීම
                     </a>
                 </div>
-                <div class="nav-item">
-                    <a href="{{ route('report.grn.sales.overview') }}" target="_blank" class="nav-link-custom">
-                        ඉතිරි වාර්තාව 1
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('report.grn.sales.overview2') }}" target="_blank" class="nav-link-custom">
-                        ඉතිරි වාර්තාව 2
-                    </a>
-                </div>
+               <div class="nav-item">
+                        <a href="#" class="nav-link-custom" data-bs-toggle="modal" data-bs-target="#supplierSelectModal"
+                            data-report-action="{{ route('report.grn.sales.overview') }}"
+                            data-report-name="GRN Sales Overview Report 1">
+                             ඉතිරි වාර්තාව 1
+                        </a>
+                    </div>
+
+
+                    <div class="nav-item">
+                        <a href="#" class="nav-link-custom" data-bs-toggle="modal" data-bs-target="#supplierSelectModal"
+                            data-report-action="{{ route('report.grn.sales.overview2') }}"
+                            data-report-name="GRN Sales Overview Report 2">
+                             ඉතිරි වාර්තාව 2
+                        </a>
+                    </div>
                 <div class="nav-item">
                     <a href="#" data-bs-toggle="modal" data-bs-target="#filterModal" class="nav-link-custom">
                         විකුණුම් වාර්තාව
@@ -302,16 +312,26 @@
     
     console.log('Navigation bars loaded - always visible');
   </script>
-  <script>
+  {{-- In your Blade file --}}
+<script>
     window.__ROUTES__ = {
-      markPrinted: '/sales/mark-printed',
-      getLoanAmount: '/get-loan-amount',
-      markAllProcessed: '/sales/mark-all-processed',
-      givenAmount: '/sales/:id/given-amount',
-     
+        markPrinted: "{{ url('/sales/mark-printed') }}",
+        getLoanAmount: "{{ url('/get-loan-amount') }}", 
+        markAllProcessed: "{{ url('/sales/mark-all-processed') }}",
+        givenAmount: "{{ url('/sales/:id/given-amount') }}",
+        getLatestGrnEntries: "{{ url('/grn-entries/latest')}}"  
     };
 </script>
-   @include('layouts.partials.footer')
+ <script>
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'F10') {
+        event.preventDefault(); // prevent browser default F10 behavior
+        location.reload(); // refresh the page
+      }
+    });
+  </script>
+
+    @include('layouts.partials.footer')
     @include('layouts.partials.report-modal')
     @include('layouts.partials.item-wisemodal')
     @include('layouts.partials.weight-modal')
@@ -321,6 +341,8 @@
     @include('layouts.partials.dayStartModal')
     @include('layouts.partials.LoanReport-Modal')
     @include('layouts.partials.grn-modal')
-     @include('layouts.partials.filterModal')
+    @include('layouts.partials.filterModal')
+    @include('layouts.partials.grn1Modal')
+    @include('layouts.partials.grn2Modal')
 </body>
 </html>

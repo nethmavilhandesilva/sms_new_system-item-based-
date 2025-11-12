@@ -75,7 +75,6 @@ textarea.form-control:focus {
     background-color: #5a6268;
     border-color: #545b62;
 }
-
 </style>
 
 <div class="form-card">
@@ -97,6 +96,22 @@ textarea.form-control:focus {
         <div class="mb-3">
             <label for="address_field" class="form-label">ලිපිනය (Address)</label>
             <textarea id="address_field" name="address" class="form-control" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="phone_field" class="form-label">දුරකථන අංකය (Phone Number)</label>
+            <input type="text" id="phone_field" name="phone" class="form-control" placeholder="Optional">
+        </div>
+
+        <div class="mb-3">
+            <label for="email_field" class="form-label">ඊමේල් ලිපිනය (Email Address)</label>
+            <input type="email" id="email_field" name="email" class="form-control" placeholder="Optional">
+        </div>
+
+        {{-- NEW FIELD ADDED HERE --}}
+        <div class="mb-3">
+            <label for="account_no_field" class="form-label">ගිණුම් අංකය (Account No)</label>
+            <input type="text" id="account_no_field" name="account_no" class="form-control" placeholder="Optional">
         </div>
 
         <div class="text-center mt-4">

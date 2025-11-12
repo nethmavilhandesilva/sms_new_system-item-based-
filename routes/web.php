@@ -16,6 +16,9 @@ use App\Models\SalesHistory;
 use App\Http\Controllers\BillController;
 use App\Models\User;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardController2;
+use App\Http\Controllers\SupplierController2;
+use Illuminate\Support\Facades\Response;
 
 
 // New default route to redirect to login
@@ -38,9 +41,11 @@ Route::resource('items', ItemController::class);
 
 // Customers
 Route::resource('customers', CustomerController::class);
+Route::get('/customers/export/pdf', [App\Http\Controllers\CustomerController::class, 'exportPdf']) ->name('customers.export.pdf');
+Route::get('/customers/export/excel', [App\Http\Controllers\CustomerController::class, 'exportExcel']) ->name('customers.export.excel');
 
 // Suppliers
-Route::resource('suppliers', SupplierController::class);
+Route::resource('suppliers', SupplierController::class)->except(['show']);
 
 // GRN
 Route::resource('grn', GrnEntryController::class) ->except(['show']);
@@ -50,6 +55,7 @@ Route::get('/grn-used-data/{code}', [GrnEntryController::class, 'getUsedData']);
 Route::post('/grn/{id}/hide', [GrnEntryController::class, 'hide'])->name('grn.hide');
 Route::post('/grn/{id}/unhide', [GrnEntryController::class, 'unhide'])->name('grn.unhide');
 Route::post('/grn-damages', [GrnEntryController::class, 'Damagestore'])->name('grn-damages.store');
+Route::get('/grn-entries/latest', [GrnEntryController::class, 'getLatestEntries']);
 
 
 // Sales
@@ -91,6 +97,11 @@ Route::get('/financial-report', [ReportController::class, 'financialReport'])->n
 Route::get('/sales-report', [ReportController::class, 'salesReport'])->name('sales.report');
 Route::get('/grn-report', [ReportController::class, 'grnReport'])->name('grn.report');
 Route::get('/returns-report', [ReportController::class, 'returnsReport']) ->name('returns.report');
+Route::get('items/export/excel', [ReportController::class, 'exportItemsExcel'])->name('items.export.excel');
+Route::get('items/export/pdf', [ReportController::class, 'exportItemsPdf'])->name('items.export.pdf');
+Route::get('/loan-report2', [ReportController::class, 'showReport'])->name('loan.report');
+Route::get('/expenses-report', [ReportController::class, 'expensereport'])->name('expenses.report');
+Route::get('/supplier-report', [ReportController::class, 'supplierpaymentreport'])->name('supplier.report');
 
 // Customer loans
 Route::get('/customers/{id}/loans-total', [CustomersLoanController::class, 'getTotalLoanAmount']);
@@ -101,6 +112,8 @@ Route::post('/save-receipt-file', [SalesEntryController::class, 'saveReceiptFile
 Route::post('/loan-report/results', [CustomersLoanController::class, 'loanReportResults'])->name('loan.report.results');
 Route::get('/customers-loans/report', [CustomersLoanController::class, 'loanReport'])->name('customers-loans.report');
 Route::resource('customers-loans', CustomersLoanController::class);
+Route::get('/loans/pdf', [CustomersLoanController::class, 'exportPdf'])->name('loans.export.pdf');
+Route::get('/loans/excel', [CustomersLoanController::class, 'exportExcel'])->name('loans.export.excel');
 //Emails
 Route::post('/send-receipt-email', [EmailController::class, 'sendReceiptEmail'])->name('send.receipt.email');
 Route::post('/send-receipt-email', [EmailController::class, 'sendReceiptEmail'])->name('send.receipt.email');
@@ -128,10 +141,15 @@ Route::get('/sales/report', [ReportController::class, 'salesfinalReport'])->name
 Route::get('/send-financial-report', [ReportController::class, 'sendFinancialReportEmail'])->name('send.financial.report');
 Route::get('/report/loans/email-simple', [ReportController::class, 'sendLoanReportEmail'])->name('report.loans.email-simple');
 Route::get('/grn/send-email', [ReportController::class, 'sendGrnEmail'])->name('grn.sendEmail'); 
+Route::get('/income-expenses-report', [ReportController::class, 'incomeExpensesReport'])->name('income.expenses.report');
+Route::get('/grn-sales-report', [ReportController::class, 'grnSalesReport'])->name('grn.sales.report');
+Route::get('/reports/grn-sales/fetch-loans', [ReportController::class, 'fetchLoanDetails'])  ->name('grn.sales.fetchLoans');  
+Route::get('/reports/grn-sales/fetch-expenses', [ReportController::class, 'fetchExpenseDetails']) ->name('grn.sales.fetchExpenses');
+Route::get('/grn-sales-fetch', [ReportController::class, 'fetchSalesByCode']) ->name('grn.sales.fetch');
 //exports
 Route::get('/sales-adjustment-report/excel', [ReportController::class, 'exportToExcel'])->name('sales-adjustment.export.excel');
 Route::get('/sales-adjustment-report/pdf', [ReportController::class, 'exportToPdf'])->name('sales-adjustment.export.pdf');
-Route::get('/grn-sales-overview/download', [ReportController::class, 'downloadGrnSalesOverviewReport'])->name('grn-sales.download');
+Route::get('/grn-sales-overview/download', [ReportController::class, 'downloadGrnSalesOverviewReport'])->name('report.download.grn.sales.overview');
 Route::get('/grn-overview/download2', [ReportController::class, 'downloadGrnOverviewReport2'])->name('grn-overview.download2');
 Route::get('/sales-report/download', [ReportController::class, 'downloadSalesReport'])->name('sales.report.download');
 Route::get('/grn/export/pdf', [ReportController::class, 'exportPdf'])->name('grn.exportPdf');
@@ -140,6 +158,10 @@ Route::get('/reports/cheque-payments', [ReportController::class, 'chequePayments
 Route::post('/reports/update-status/{id}', [ReportController::class, 'updateStatus'])  ->name('reports.update-status');
 Route::get('/generate-report', [ReportController::class, 'generateReport']) ->name('generate.report');//returns
 Route::get('/grn-entry/{code}/remaining', [App\Http\Controllers\GrnEntryController::class, 'getRemaining']);
+Route::get('/grn-report3', [ReportController::class, 'grnfinal'])->name('grn.reportfinal');
+Route::get('/search-codes', [ReportController::class, 'searchCodes'])->name('search.codes');
+Route::post('/grn-report/update/{id}', [ReportController::class, 'update'])->name('grn.update');
+Route::get('/search-suppliers', [ReportController::class, 'searchSuppliers'])->name('suppliers.search');
 //returns
 Route::get('/api/grn-entry/{code}', function ($code) {
     $entry = \App\Models\GrnEntry::where('code', $code)->first();
@@ -157,6 +179,7 @@ Route::get('/api/all-bill-nos', function () {
 });
 //GRN OPTIONS
 Route::post('/grn/update-status/{id}', [GrnEntryController::class, 'updateStatus'])->name('grn.updateStatus');
+Route::post('/grn-report/mark-read/{id}', [GrnEntryController::class, 'markAsRead']);
 // web.php
 Route::get('/grn-entry/{code}', [GrnEntryController::class, 'getGrnEntry'])->name('grn.entry.fetch');
 Route::post('/settings/update-balance', [SalesEntryController::class, 'updateBalance'])->name('settings.updateBalance');
@@ -186,5 +209,38 @@ Route::get('/sales-entry/react', [DashboardController::class, 'index'])->name('d
 Route::post('/grn/react', [GrnEntryController::class, 'store'])->name('grn.store2'); // existing store handler (JSON)
 //given amount
 Route::put('/sales/{sale}/given-amount', [SalesEntryController::class, 'updateGivenAmount'])->name('sales.update-given-amount');
+//new dasboard2
+Route::get('/sales-entry2', [DashboardController2::class, 'showEntry2'])->name('Dashboard2');
+//GRN REPORT 2
+Route::get('/grn-report2', [GrnEntryController::class, 'showGrnReport'])->name('grn.report2');
+Route::get('/grn/fetch-details', [GrnEntryController::class, 'fetchGrnDetails'])->name('grn.fetch.details');
+//supliers2
+
+Route::get('/suppliers2', [SupplierController2::class, 'index'])->name('suppliers2.index');
+Route::post('/suppliers2', [SupplierController2::class, 'store'])->name('suppliers2.store');
+Route::get('/suppliers2/{id}/edit', [SupplierController2::class, 'edit'])->name('suppliers2.edit');
+Route::put('/suppliers2/{id}', [SupplierController2::class, 'update'])->name('suppliers2.update');
+Route::delete('/suppliers2/{id}', [SupplierController2::class, 'destroy'])->name('suppliers2.destroy');
+Route::post('suppliers2/payment', [SupplierController2::class, 'payment'])->name('suppliers2.payment');
+Route::get('/suppliers2/balance', [App\Http\Controllers\SupplierController2::class, 'getBalance'])->name('suppliers2.balance');
+Route::get('/suppliers/transactions', [SupplierController2::class, 'getSupplierTransactions'])->name('suppliers2.transactions');   
+Route::post('/suppliers2/payment-many', [App\Http\Controllers\SupplierController2::class, 'storeManyPayment'])
+     ->name('suppliers2.payment.many');
+
+// 2. This route is used by JavaScript to fetch unpaid GRNs for a supplier
+Route::get('/suppliers/get-unpaid-grns/{supplier_code}', [App\Http\Controllers\SupplierController2::class, 'getUnpaidGrns'])
+     ->name('suppliers.getUnpaidGrns');
+     
+Route::get('/file/{folder}/{subfolder}/{filename}', function ($folder, $subfolder, $filename) {
+    $path = storage_path("app/public/{$folder}/{$subfolder}/{$filename}");
+
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return Response::file($path);
+});     
+     
+
 
 require __DIR__.'/auth.php';

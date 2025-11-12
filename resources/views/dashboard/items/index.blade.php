@@ -51,7 +51,7 @@
             <a href="{{ route('items.create') }}" class="btn btn-success">
                 + නව භාණ්ඩයක් එකතු කරන්න
             </a>
-            <input type="text" id="itemSearch" class="form-control form-control-sm" placeholder="අංකය හෝ වර්ගය අනුව සොයන්න">
+            <input type="text" id="itemSearch" class="form-control form-control-sm" placeholder="අංකය හෝ වර්ගය අනුව සොයන්න" style="text-transform: uppercase;">
         </div>
 
         @if(session('success'))
@@ -64,7 +64,7 @@
                     <tr>
                         <th>ක අංකය</th>
                         <th>වර්ගය</th>
-                        <th>මල්ලක අගය</th>
+                        <th>මිලදි ගැනීමේ අගය</th>
                         <th>මල්ලක කුලිය</th>
                         <th>මෙහෙයුම්</th>
                     </tr>
@@ -76,15 +76,23 @@
                         <td>{{ $item->type }}</td>
                         <td>{{ number_format($item->pack_cost, 2) }}</td>
                         <td>{{ number_format($item->pack_due, 2) }}</td>
-                        <td>
-                            <a href="{{ route('items.edit', $item->id) }}" class="btn btn-primary btn-sm">යාවත්කාලීන</a>
-                            <form action="{{ route('items.destroy', $item->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-danger btn-sm"
-                                        onclick="return confirm('ඔබට මෙම භාණ්ඩය මකන්න අවශ්‍යද?')">මකන්න</button>
-                            </form>
-                        </td>
+                          <td>
+    <a href="{{ route('items.edit', $item->id) }}" 
+       class="btn btn-primary btn-sm"
+       @if(Auth::user()->role === 'Level2') onclick="return false;" style="pointer-events: none; opacity: 0.6;" @endif>
+       යාවත්කාලීන
+    </a>
+
+    <form action="{{ route('items.destroy', $item->id) }}" method="POST" class="d-inline">
+        @csrf
+        @method('DELETE')
+        <button class="btn btn-danger btn-sm"
+                onclick="return confirm('ඔබට මෙම භාණ්ඩය මකන්න අවශ්‍යද?')"
+                @if(Auth::user()->role === 'Level2') disabled style="opacity: 0.6; cursor: not-allowed;" @endif>
+            මකන්න
+        </button>
+    </form>
+</td>
                     </tr>
                     @endforeach
 
@@ -95,6 +103,8 @@
                     @endif
                 </tbody>
             </table>
+            <a href="{{ route('items.export.excel') }}" class="btn btn-success">📥 Excel</a>
+<a href="{{ route('items.export.pdf') }}" class="btn btn-danger">📥 PDF</a>
         </div>
     </div>
 </div>

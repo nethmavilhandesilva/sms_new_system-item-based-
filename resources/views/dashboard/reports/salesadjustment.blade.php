@@ -2,6 +2,30 @@
 
 @section('content')
 <style>
+.table-responsive {
+    max-height: 80vh; /* 80% of the screen height */
+    overflow-y: auto;
+}
+
+.table-responsive > table > thead th,
+.custom-card > table > thead th {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+   /* Inherits the thead's background color */
+}
+
+/* This rule targets the footers in BOTH report styles */
+.table-responsive > table > tfoot tr,
+.custom-card > table > tfoot tr {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+}
+</style>
+<style>
     /* --- Body & Card --- */
     body {
         background-color: #99ff99 !important;
@@ -57,48 +81,115 @@
     }
 
     /* ================= PRINT STYLES ================= */
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-
-        .container, .container * {
-            visibility: visible;
-        }
-
-        .container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            transform: scale(0.9);
-            transform-origin: top left;
-        }
-
-        html, body {
-            overflow: visible !important;
-            height: auto !important;
-        }
-
-        table {
-            font-size: 11px !important;
-            page-break-inside: avoid;
-            width: 100% !important;
-        }
-
-        th, td {
-            padding: 4px !important;
-        }
-
-        .card-header {
-            padding: 8px !important;
-            font-size: 13px !important;
-        }
-
-        .print-btn, a {
-            display: none !important;
-        }
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 15mm;
     }
+
+    body {
+        background: white !important;
+        color: black !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        font-size: 12px !important;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    .container, .container * {
+        visibility: visible;
+    }
+
+    .container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    /* Table formatting for print */
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 11.5px !important;
+        page-break-inside: auto;
+    }
+
+    th, td {
+        border: 1px solid #444 !important;
+        padding: 5px 6px !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    thead {
+        display: table-header-group !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+    }
+
+    tfoot {
+        display: table-footer-group !important;
+    }
+
+    tr {
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
+    }
+
+    /* Ensure header and first row stay together */
+    thead + tbody tr:first-child {
+        page-break-before: avoid !important;
+    }
+
+    .table-dark th {
+        background-color: #e0e0e0 !important;
+        color: #000 !important;
+    }
+
+    .card-header {
+        background-color: white !important;
+        color: black !important;
+        text-align: center !important;
+        padding: 10px 0 !important;
+        border-bottom: 2px solid #444 !important;
+    }
+
+    .report-title-bar {
+        justify-content: space-between;
+        flex-wrap: wrap;
+        text-align: center;
+    }
+
+    h2.company-name, h4.fw-bold {
+        color: black !important;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    /* Hide unnecessary UI elements */
+    .print-btn,
+    a[href],
+    .btn,
+    .d-flex.justify-content-center {
+        display: none !important;
+    }
+
+    /* Ensure table sits nicely below header */
+    .table-responsive {
+        margin-top: 10mm;
+    }
+
+    html, body {
+        height: auto !important;
+        overflow: visible !important;
+    }
+}
+
 </style>
 
 @php
@@ -204,7 +295,7 @@
     </div>
 
     <div class="d-flex justify-content-center mt-3">
-        {{ $entries->links() }}
+       
     </div>
 </div>
 @endsection

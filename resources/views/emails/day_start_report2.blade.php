@@ -236,89 +236,95 @@
 <body>
 
     <div class="container">
-
-      
-
-        {{-- Section 5 - Bill Summary (Sales By Bill) --}}
-        <div class="report-section">
-            <div class="report-header">
-                <div class="title">
-                    <h2 class="company-name">Sales Report</h2>
-                    <h4>Bill Summary</h4>
-                </div>
-                <div class="date-info">
-                    <span>{{ \Carbon\Carbon::now()->format('Y-m-d H:i') }}</span>
-                  
-                </div>
-            </div>
-            <div class="bill-details">
-                @if ($salesByBill->isEmpty())
-                    <div class="alert alert-info">No sales records found.</div>
-                @else
-                    @php $grandTotal = 0; @endphp
-                    @foreach ($salesByBill as $billNo => $sales)
-                        @php
-                            $firstPrinted = $sales->first()->FirstTimeBillPrintedOn ?? null;
-                            $reprinted = $sales->first()->BillReprintedOn ?? null;
-                            $billTotal = 0;
-                        @endphp
-                        <div class="bill-header">
-                            <h5>Bill No: {{ $billNo }}</h5>
-                            <div class="info">
-                                @if($firstPrinted)
-                                    <span>First Printed: {{ \Carbon\Carbon::parse($firstPrinted)->format('Y-m-d H:i') }}</span>
-                                @endif
-                                @if($reprinted)
-                                    <span>Reprinted: {{ \Carbon\Carbon::parse($reprinted)->format('Y-m-d H:i') }}</span>
-                                @endif
-                            </div>
-                        </div>
-                        <table class="report-table bill-summary-table mb-4">
-                            <thead>
-                                <tr>
-                                    <th>කේතය</th>
-                                    <th>පාරිභෝගික කේතය</th>
-                                    <th>සැපයුම්කරු කේතය</th>
-                                    <th>භාණ්ඩ නාමය</th>
-                                    <th>බර</th>
-                                    <th>කිලෝවකට මිල</th>
-                                    <th>එකතුව</th>
-                                    <th>පැකේජ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($sales as $sale)
-                                    @php $billTotal += $sale->total; @endphp
-                                    <tr>
-                                        <td>{{ $sale->code }}</td>
-                                        <td>{{ $sale->customer_code }}</td>
-                                        <td>{{ $sale->supplier_code }}</td>
-                                        <td>{{ $sale->item_name }}</td>
-                                        <td>{{ number_format($sale->weight, 2) }}</td>
-                                        <td>{{ number_format($sale->price_per_kg, 2) }}</td>
-                                        <td>{{ number_format($sale->total, 2) }}</td>
-                                        <td>{{ $sale->packs }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot>
-                                <tr class="bill-total-row">
-                                    <th colspan="6">Bill Total:</th>
-                                    <th>{{ number_format($billTotal, 2) }}</th>
-                                    <th></th>
-                                </tr>
-                            </tfoot>
-                        </table>
-                        @php $grandTotal += $billTotal; @endphp
-                    @endforeach
-                    <div class="grand-total">
-                        <h3>Grand Total: Rs. {{ number_format($grandTotal, 2) }}</h3>
-                    </div>
-                @endif
-            </div>
+        {{-- Section 5 - Customer-wise Sales Summary --}}
+<div class="report-section">
+    <div class="report-header">
+        <div class="title">
+            <h2 class="company-name">Sales Report</h2>
+            <h4>Customer-wise Bill Summary</h4>
         </div>
-        
-      
+        <div class="date-info">
+            <span>{{ \Carbon\Carbon::now()->format('Y-m-d H:i') }}</span>
+        </div>
+    </div>
+
+    <div class="bill-details">
+        @if ($salesByBill->isEmpty())
+            <div class="alert alert-info">No sales records found.</div>
+        @else
+            @php $grandTotal = 0; @endphp
+
+            @foreach ($salesByBill as $customerCode => $sales)
+                @php
+                    $billNo = $sales->first()->bill_no ?? null;
+                    $firstPrinted = $sales->first()->FirstTimeBillPrintedOn ?? null;
+                    $reprinted = $sales->first()->BillReprintedOn ?? null;
+                    $billTotal = 0;
+                @endphp
+
+                {{-- Header for each customer --}}
+                <div class="bill-header mt-4">
+                    <h5>Customer Code: {{ $customerCode }}</h5>
+                    @if($billNo)
+                        <p><strong>Bill No:</strong> {{ $billNo }}</p>
+                    @endif
+                    <div class="info">
+                        @if($firstPrinted)
+                            <span>First Printed: {{ \Carbon\Carbon::parse($firstPrinted)->format('Y-m-d H:i') }}</span>
+                        @endif
+                        @if($reprinted)
+                            <span>Reprinted: {{ \Carbon\Carbon::parse($reprinted)->format('Y-m-d H:i') }}</span>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Table for each customer's sales --}}
+                <table class="report-table bill-summary-table mb-4">
+                    <thead>
+                        <tr>
+                            <th>කේතය</th>
+                            <th>පාරිභෝගික කේතය</th>
+                            <th>සැපයුම්කරු කේතය</th>
+                            <th>භාණ්ඩ නාමය</th>
+                            <th>බර</th>
+                            <th>කිලෝවකට මිල</th>
+                            <th>එකතුව</th>
+                            <th>පැකේජ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($sales as $sale)
+                            @php $billTotal += $sale->total; @endphp
+                            <tr>
+                                <td>{{ $sale->code }}</td>
+                                <td>{{ $sale->customer_code }}</td>
+                                <td>{{ $sale->supplier_code }}</td>
+                                <td>{{ $sale->item_name }}</td>
+                                <td>{{ number_format($sale->weight, 2) }}</td>
+                                <td>{{ number_format($sale->price_per_kg, 2) }}</td>
+                                <td>{{ number_format($sale->total, 2) }}</td>
+                                <td>{{ $sale->packs }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr class="bill-total-row">
+                            <th colspan="6">Customer Total:</th>
+                            <th>{{ number_format($billTotal, 2) }}</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                @php $grandTotal += $billTotal; @endphp
+            @endforeach
+
+            <div class="grand-total mt-4">
+                <h3>Grand Total: Rs. {{ number_format($grandTotal, 2) }}</h3>
+            </div>
+        @endif
+    </div>
+</div>
 
         {{-- Section 7 - Financial Report --}}
         <div class="report-section">
@@ -373,7 +379,7 @@
                                 @endif
                             </td>
                         </tr>
-                        <tr class="financial-profit-row">
+                       <tr class="financial-profit-row">
                             <td>💰 Profit</td>
                             <td colspan="2" class="text-success text-center">{{ number_format($profitTotal, 2) }}</td>
                         </tr>
@@ -385,7 +391,143 @@
                 </table>
             </div>
         </div>
-        {{-- ================= SECTION 7 - Loan Report ================= --}}
+        {{-- ======================================================== --}}
+        {{-- == ⬇️ NEW SECTION: GRN Sales, Loans & Expense Summary ⬇️ == --}}
+        {{-- ======================================================== --}}
+        <div class="report-section">
+            <div class="report-header">
+                <div class="title">
+                    <h2>GRN Sales Report</h2>
+                    <h4>(Includes Loan & Expense Summary)</h4>
+                </div>
+                <div class="date-info">
+                    <span>{{ $dayStartDate->format('Y-m-d') }}</span>
+                </div>
+            </div>
+
+            <div class="table-container">
+                
+                {{-- 1. GRN Sales Table --}}
+                <h3 style="text-align: center; color: #004d00; margin-bottom: 15px;">GRN Sales Table</h3>
+                
+                <table class="report-table">
+                    <thead style="background-color: #cce5ff; color: #004085; font-weight: bold;">
+                        <tr>
+                            <th>Code / Item</th>
+                            <th>Sold Weight</th>
+                            <th>Sold Packs</th>
+                            <th>Selling Price</th>
+                            <th>Total Cost</th>
+                            <th>Net Sale</th>
+                            <th>Profit / Loss</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            // Initialize totals here since we can't use JavaScript
+                            $totalSellingPrice = 0;
+                            $totalCost = 0;
+                            $totalNetSale = 0;
+                            $totalProfitLoss = 0;
+                        @endphp
+
+                        @forelse($grnSalesReport as $row)
+                            @php
+                                $profitLoss = $row->netsale - $row->total_cost;
+                                
+                                // Increment totals
+                                $totalSellingPrice += $row->selling_price;
+                                $totalCost += $row->total_cost;
+                                $totalNetSale += $row->netsale;
+                                $totalProfitLoss += $profitLoss;
+                            @endphp
+                            <tr>
+                                <td>{{ $row->code }} - {{ $row->item_name }}</td>
+                                <td>{{ number_format($row->sold_weight, 3) }}</td>
+                                <td>{{ number_format($row->sold_packs, 0) }}</td>
+                                <td>{{ number_format($row->selling_price, 2) }}</td>
+                                <td>{{ number_format($row->total_cost, 2) }}</td>
+                                <td>{{ number_format($row->netsale, 2) }}</td>
+                                <td style="color: {{ $profitLoss < 0 ? 'red' : 'green' }}; font-weight: bold;">
+                                    {{ number_format(abs($profitLoss), 2) }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center" style="text-align: center; padding: 15px;">
+                                    No GRN sales data found for this period.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                    <tfoot class="fw-bold" style="background-color: #f0f0f0; font-weight: bold;">
+                        <tr>
+                            <td class="text-end" style="text-align: right; padding: 10px;">Totals:</td>
+                            <td></td> {{-- Sold Weight Total (blank) --}}
+                            <td></td> {{-- Sold Packs Total (blank) --}}
+                            <td style="padding: 10px;">{{ number_format($totalSellingPrice, 2) }}</td>
+                            <td style="padding: 10px;">{{ number_format($totalCost, 2) }}</td>
+                            <td style="padding: 10px;">{{ number_format($totalNetSale, 2) }}</td>
+                            <td style="color: {{ $totalProfitLoss < 0 ? 'red' : 'green' }}; padding: 10px;">
+                                {{ number_format(abs($totalProfitLoss), 2) }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                {{-- 2. 💰 Loan Summary Card --}}
+                <h3 style="text-align: center; color: #004d00; margin-top: 25px; margin-bottom: 15px;">
+                    Loan Summary
+                </h3>
+                <div style="border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; overflow: hidden; background-color: #fdfdfd;">
+                    <div style="padding: 20px; text-align: center; display: flex; width: 100%;">
+                        <div style="width: 50%; border-right: 1px solid #ddd; padding-right: 15px;">
+                            <h5 style="color: #666; margin: 0 0 10px 0; font-size: 16px; font-weight: normal;">
+                                Today's Loans
+                            </h5>
+                            <p style="font-size: 26px; font-weight: bold; color: #007bff; margin: 0;">
+                                {{ number_format(abs($grnSales_todayLoanTotal), 2) }}
+                            </p>
+                        </div>
+                        <div style="width: 50%; padding-left: 15px;">
+                            <h5 style="color: #666; margin: 0 0 10px 0; font-size: 16px; font-weight: normal;">
+                                Old Loans
+                            </h5>
+                            <p style="font-size: 26px; font-weight: bold; color: #dc3545; margin: 0;">
+                                {{ number_format(abs($grnSales_oldLoanTotal), 2) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 3. 💸 Expense Summary Card --}}
+                <h3 style="text-align: center; color: #004d00; margin-top: 25px; margin-bottom: 15px;">
+                    Expenses Summary
+                </h3>
+                <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background-color: #fdfdfd;">
+                    <div style="padding: 10px;">
+                        <ul style="list-style-type: none; margin: 0; padding: 0;">
+                            @forelse($grnSales_expenseCategories as $expense)
+                                <li style="padding: 12px 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+                                    <span style="text-transform: capitalize; color: #333;">
+                                        {{ $expense->category }}
+                                    </span>
+                                    <span style="background-color: #dc3545; color: white; border-radius: 12px; padding: 5px 12px; font-size: 14px; font-weight: bold;">
+                                        {{ number_format(abs($expense->total_amount), 2) }}
+                                    </span>
+                                </li>
+                            @empty
+                                <li style="padding: 15px; color: #777; text-align: center;">
+                                    No expenses found for this period.
+                                </li>
+                            @endforelse
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
 <div class="custom-card">
     <div class="report-title-bar">
         <h2 class="company-name">TGK ට්‍රේඩර්ස්</h2>

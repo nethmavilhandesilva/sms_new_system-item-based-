@@ -68,6 +68,16 @@
               </select>
             </div>
 
+            {{-- Order By --}}
+            <div class="col-md-6">
+              <label for="order_by" class="form-label">Order By</label>
+              <select name="order_by" id="order_by" class="form-select form-select-sm">
+                <option value="">-- Select Order --</option>
+                <option value="bill_no" {{ request('order_by') == 'bill_no' ? 'selected' : '' }}>Bill No</option>
+                <option value="customer_code" {{ request('order_by') == 'customer_code' ? 'selected' : '' }}>Customer Code</option>
+              </select>
+            </div>
+
             {{-- Start Date --}}
             <div class="col-md-6">
               <label for="start_date" class="form-label">Start Date</label>

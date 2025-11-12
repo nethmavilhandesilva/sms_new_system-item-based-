@@ -73,6 +73,14 @@ class AppServiceProvider extends ServiceProvider
             $view->with('customers', Customer::all());
         
         });
+        View::composer('layouts.partials.grn2Modal', function ($view) {
+            // Select distinct codes with their related fields
+            $codes = GrnEntry::select('code', 'item_code', 'item_name', 'txn_date')
+                ->distinct('code')
+                ->get();
+
+            $view->with('allCodes', $codes);
+        });
          View::composer('layouts.partials.grn-modal', function ($view) {
         // Fetch unique 'code' values from the GrnEntry model
         $codes = GrnEntry::select('code')->distinct()->pluck('code');

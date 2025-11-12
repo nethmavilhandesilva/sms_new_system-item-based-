@@ -77,18 +77,24 @@
             <table class="table table-bordered table-striped table-hover align-middle">
                 <thead>
                     <tr>
-                        <th>සංකේතය (Code)</th>
-                        <th>නම (Name)</th>
-                        <th>ලිපිනය (Address)</th>
-                        <th>මෙහෙයුම් (Actions)</th>
+                        <th>කේතය</th>
+                        <th>නම</th>
+                        <th>ලිපිනය</th>
+                        <th>දුරකථන අංකය</th>
+                        <th>ඊමේල්</th>
+                        <th>ගිණුම් අංකය</th> {{-- NEW COLUMN HEADER --}}
+                        <th>මෙහෙයුම්</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($suppliers as $supplier)
                         <tr>
-                           <td style="text-transform: uppercase;">{{ $supplier->code }}</td>
+                            <td style="text-transform: uppercase;">{{ $supplier->code }}</td>
                             <td>{{ $supplier->name }}</td>
                             <td>{{ $supplier->address }}</td>
+                            <td>{{ $supplier->phone ?? '-' }}</td>
+                            <td>{{ $supplier->email ?? '-' }}</td>
+                            <td>{{ $supplier->account_no ?? '-' }}</td> {{-- NEW COLUMN DATA --}}
                             <td>
                                 <a href="{{ route('suppliers.edit', $supplier->id) }}" class="btn btn-warning btn-sm">යාවත්කාලීන</a>
                                 <form action="{{ route('suppliers.destroy', $supplier->id) }}" method="POST" class="d-inline">
@@ -99,7 +105,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center text-muted">සැපයුම්කරුවන් නොමැත</td>
+                            <td colspan="7" class="text-center text-muted">සැපයුම්කරුවන් නොමැත</td> {{-- COLSPAN UPDATED TO 7 --}}
                         </tr>
                     @endforelse
                 </tbody>

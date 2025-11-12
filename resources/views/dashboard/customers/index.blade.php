@@ -65,11 +65,20 @@
     <div class="custom-card">
         <h2 class="mb-4 text-center text-primary">පාරිභෝගික ලැයිස්තුව (Customer List)</h2>
 
-        <div class="text-end mb-3">
-            <a href="{{ route('customers.create') }}" class="btn btn-add">
-                + නව පාරිභෝගිකයෙකු එකතු කරන්න
-            </a>
-        </div>
+         <div class="d-flex justify-content-between mb-3">
+                <!-- Left side: PDF & Excel -->
+                <div>
+                    <a href="{{ route('customers.export.pdf') }}" class="btn btn-danger">📥 PDF</a>
+                    <a href="{{ route('customers.export.excel') }}" class="btn btn-success">📥 Excel</a>
+                </div>
+
+                <!-- Right side: Add Customer -->
+                <div>
+                    <a href="{{ route('customers.create') }}" class="btn btn-add">
+                        + නව පාරිභෝගිකයෙකු එකතු කරන්න
+                    </a>
+                </div>
+            </div>
 
         @if (session('success'))
             <div class="alert alert-success text-center">{{ session('success') }}</div>

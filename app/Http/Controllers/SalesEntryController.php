@@ -135,105 +135,101 @@ class SalesEntryController extends Controller
 }
 public function store(Request $request)
 {
-    // 1. Add bill_printed to validation (it's optional, 'N' or 'Y')
+    // 1. 🔹 UPDATED Validation to match the new frontend
     $validated = $request->validate([
-        'supplier_code' => 'required',
+        'supplier_code' => 'required|string|max:255', // ✅ ADDED
         'customer_code' => 'required|string|max:255',
         'customer_name' => 'nullable',
-        'code' => 'required',
-        'item_code' => 'required',
+        // 'code' => 'required', // 🔹 REMOVED (Now derived from item_code)
+        'item_code' => 'required|string|exists:items,no', // ✅ UPDATED (Validates against items table)
         'item_name' => 'required',
         'weight' => 'required|numeric',
         'price_per_kg' => 'required|numeric',
+        'pack_due' => 'nullable|numeric',
         'total' => 'required|numeric',
-        'packs' => 'required|integer',
-        'grn_entry_code' => 'required|string|exists:grn_entries,code',
-        'original_weight' => 'nullable',
-        'original_packs' => 'nullable',
+        'packs' => 'required|numeric',
+        // 🔹 REMOVED: 'grn_entry_code'
+        // 🔹 REMOVED: 'original_weight'
+        // 🔹 REMOVED: 'original_packs'
         'given_amount' => 'nullable|numeric',
-        // ✅ ADDED: Allow 'bill_printed' to be passed from the client
-        'bill_printed' => 'nullable|string|in:N,Y', 
+        'bill_no' => 'nullable|string|max:255',
+        'bill_printed' => 'nullable|string|in:N,Y',
     ]);
 
     try {
-        DB::beginTransaction(); // Start a database transaction
+        DB::beginTransaction();
 
-        // 1. Find the original GRN record using the grn_entry_code
-        $grnEntry = GrnEntry::where('code', $validated['grn_entry_code'])->first();
+        // 1. 🔹 REMOVED: All GrnEntry fetching logic
+        // $grnEntry = GrnEntry::where('code', $validated['grn_entry_code'])->first();
+        // ... (all related error checks and variable assignments) ...
 
-        if (!$grnEntry) {
-            return response()->json([
-                'error' => 'Selected GRN entry not found for update.'
-            ], 422);
-        }
+        // 2. 🔹 REMOVED: PerKGPrice and PerKGTotal logic from GRN
+        // $perKgPrice = $grnEntry->BP;
+        // $perKgTotal = $perKgPrice * $validated['weight'];
 
-        // 2. Get the PerKGPrice from the GRN entry and calculate PerKGTotal (the cost)
-        $perKgPrice = $grnEntry->PerKGPrice;
-        $perKgTotal = $perKgPrice * $validated['weight'];
-
-        // 4. Get the date value from settings
-        $settingDate = Setting::value('value'); 
-
+        // 3. Get the date value from settings
+        $settingDate = Setting::value('value');
         if (!$settingDate) {
-            $settingDate = now()->toDateString(); // fallback if null
+            $settingDate = now()->toDateString();
         }
 
-        // 5. Create the Sale record
+        // 4. Create the Sale record
         $loggedInUserId = auth()->user()->user_id;
         $uniqueCode = $validated['customer_code'] . '-' . $loggedInUserId;
-        $sellingKGTotal = $validated['total'] - $perKgTotal;
-        $saleCode = $grnEntry->code;
         
-        // **KEY FIX:** Determine the final bill_printed status
-        // If the client sent 'N', use 'N'. Otherwise, default to NULL (new sales)
+        // 🔹 REMOVED: $sellingKGTotal, $saleCode
+        
         $billPrintedStatus = $validated['bill_printed'] ?? null;
-
+        $billNo = $validated['bill_no'] ?? null;
 
         $sale = Sale::create([
-            'supplier_code' => $validated['supplier_code'],
+            'supplier_code' => $validated['supplier_code'], // ✅ ADDED
             'customer_code' => strtoupper($validated['customer_code']),
             'customer_name' => $validated['customer_name'],
-            'code' => $saleCode,
+            
+            // ✅ YOUR REQUEST: 'code' column is populated with 'item_code'
+            'code' => $validated['item_code'], 
+            
             'item_code' => $validated['item_code'],
             'item_name' => $validated['item_name'],
             'weight' => $validated['weight'],
             'price_per_kg' => $validated['price_per_kg'],
+            'pack_due' => $validated['pack_due'] ?? 0,
             'total' => $validated['total'],
             'packs' => $validated['packs'],
-            'original_weight' => $validated['original_weight'],
-            'original_packs' => $validated['original_packs'],
+            
+            // 🔹 REMOVED: 'original_weight', 'original_packs'
+            
             'Processed' => 'N',
             'FirstTimeBillPrintedOn' => null,
             'BillChangedOn' => null,
             'CustomerBillEnteredOn' => now(),
             'UniqueCode' => $uniqueCode,
-            'PerKGPrice' => $perKgPrice,
-            'PerKGTotal' => $perKgTotal,
-            'SellingKGTotal' => $sellingKGTotal,
+            
+            // 🔹 REMOVED: 'PerKGPrice', 'PerKGTotal', 'SellingKGTotal'
+            // (These were dependent on the GRN entry)
+            
             'Date' => $settingDate,
             'ip_address' => $request->ip(),
             'given_amount' => $validated['given_amount'],
             
-            // ✅ CRITICAL FIX: Add the bill_printed status to the creation
-            'bill_printed' => $billPrintedStatus, 
+            'bill_printed' => $billPrintedStatus,
+            'bill_no' => $billNo,
         ]);
         
-        $this->updateGrnRemainingStock($validated['grn_entry_code']);
+        // 🔹 REMOVED: updateGrnRemainingStock() call
+        // $this->updateGrnRemainingStock($validated['grn_entry_code']);
 
-        DB::commit(); // Commit the transaction
+        DB::commit();
 
-        // 6. Return the status in the response data so the client state updates correctly
         return response()->json([
             'success' => true,
-            'data' => $sale->toArray() 
-            // Better to return $sale->toArray() to include all created fields 
-            // like id, timestamps, and crucially, bill_printed, 
-            // instead of manually listing fields.
+            'data' => $sale->fresh()->toArray()
         ]);
 
     } catch (\Exception | \Illuminate\Database\QueryException $e) {
-        DB::rollBack(); // Rollback on any exception
-        Log::error('Failed to add sales entry and update GRN: ' . $e->getMessage());
+        DB::rollBack();
+        Log::error('Failed to add sales entry: ' . $e->getMessage());
         
         return response()->json([
             'error' => 'Failed to add sales entry: ' . $e->getMessage()
@@ -362,8 +358,15 @@ private function generateNewBillNumber()
         'item_name' => 'required|string|max:255',
         'weight' => 'required|numeric|min:0',
         'price_per_kg' => 'required|numeric|min:0',
+        'pack_due' => 'nullable|numeric|min:0', // ✅ ADDED
         'total' => 'required|numeric|min:0',
         'packs' => 'required|integer|min:0',
+        'grn_entry_code' => 'nullable|string|max:255', // ✅ ADDED
+        'original_weight' => 'nullable|numeric|min:0', // ✅ ADDED
+        'original_packs' => 'nullable|integer|min:0', // ✅ ADDED
+        'given_amount' => 'nullable|numeric|min:0', // ✅ ADDED
+        'bill_no' => 'nullable|string|max:255', // ✅ ADDED
+        'bill_printed' => 'nullable|string|in:N,Y', // ✅ ADDED
     ]);
 
     try {
@@ -385,6 +388,7 @@ private function generateNewBillNumber()
                 'item_name' => $originalData['item_name'],
                 'weight' => $originalData['weight'],
                 'price_per_kg' => $originalData['price_per_kg'],
+                'pack_due' => $originalData['pack_due'] ?? 0, // ✅ ADDED
                 'total' => $originalData['total'],
                 'packs' => $originalData['packs'],
                 'bill_no' => $originalData['bill_no'],
@@ -409,7 +413,14 @@ private function generateNewBillNumber()
             'weight' => $validatedData['weight'],
             'packs' => $validatedData['packs'],
             'price_per_kg' => $validatedData['price_per_kg'],
+            'pack_due' => $validatedData['pack_due'] ?? $sale->pack_due, // ✅ ADDED
             'total' => $validatedData['total'],
+            'grn_entry_code' => $validatedData['grn_entry_code'] ?? $sale->grn_entry_code, // ✅ ADDED
+            'original_weight' => $validatedData['original_weight'] ?? $sale->original_weight, // ✅ ADDED
+            'original_packs' => $validatedData['original_packs'] ?? $sale->original_packs, // ✅ ADDED
+            'given_amount' => $validatedData['given_amount'] ?? $sale->given_amount, // ✅ ADDED
+            'bill_no' => $validatedData['bill_no'] ?? $sale->bill_no, // ✅ ADDED
+            'bill_printed' => $validatedData['bill_printed'] ?? $sale->bill_printed, // ✅ ADDED
             'updated' => 'Y',
             'BillChangedOn' => now(),
         ]);
@@ -427,6 +438,7 @@ private function generateNewBillNumber()
                 'item_name' => $newData->item_name,
                 'weight' => $newData->weight,
                 'price_per_kg' => $newData->price_per_kg,
+                'pack_due' => $newData->pack_due ?? 0, // ✅ ADDED
                 'total' => $newData->total,
                 'packs' => $newData->packs,
                 'bill_no' => $newData->bill_no,
@@ -684,17 +696,16 @@ public function dayStart(Request $request)
             $currentSales = Sale::where('code', $code)->get();
             $historicalSales = SalesHistory::where('code', $code)->get();
             $relatedSales = $currentSales->merge($historicalSales);
-            
+
             $totalSalesValue = $relatedSales->sum('total');
-            $totalSoldPacks =  $relatedSales->sum('packs');
-            $totalSoldWeight =$relatedSales->sum('weight');
+            $totalSoldPacks = $relatedSales->sum('packs');
+            $totalSoldWeight = $relatedSales->sum('weight');
 
             $totalWastedPacks = $entries->sum('wasted_packs');
             $totalWastedWeight = $entries->sum('wasted_weight');
-            
-            $remainingPacks= $totalOriginalPacks-$totalSoldPacks;
+
+            $remainingPacks = $totalOriginalPacks - $totalSoldPacks;
             $remainingWeight = $totalOriginalWeight - $totalSoldWeight;
-             
 
             $dayStartReportData[] = [
                 'date' => Carbon::parse($entries->first()->created_at)
@@ -734,10 +745,10 @@ public function dayStart(Request $request)
 
                 $originalPacks += $grnEntry->original_packs;
                 $originalWeight += $grnEntry->original_weight;
-                $soldPacks +=$relatedSales->sum('packs');
+                $soldPacks += $relatedSales->sum('packs');
                 $soldWeight += $relatedSales->sum('weight');
-                $remainingPacks += $originalPacks-$soldPacks;
-                $remainingWeight += $originalWeight-$soldWeight;
+                $remainingPacks += $originalPacks - $soldPacks;
+                $remainingWeight += $originalWeight - $soldWeight;
                 $totalSalesValue += $totalSalesValueForGrn;
             }
 
@@ -753,20 +764,62 @@ public function dayStart(Request $request)
             ];
         }
 
-        // --- Weight-Based Report Data ---
-        $weightBasedReportData = Sale::selectRaw(
-            'item_name, item_code, SUM(packs) as packs, SUM(weight) as weight, SUM(total) as total'
-        )
-            ->groupBy('item_name', 'item_code')
-            ->orderBy('item_name', 'asc')
-            ->get();
+        // --- Weight-Based Report Data (Updated Logic) ---
+        $grnCode = $request->input('grn_code');
+        $supplierCode = $request->input('supplier_code');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        if ($startDate && $endDate) {
+            $model = SalesHistory::query();
+            $dateColumn = 'Date'; // column in SalesHistory
+        } else {
+            $model = Sale::query();
+            $dateColumn = null;
+        }
+
+        // Aggregate first to avoid duplicates
+        $query = $model->selectRaw("
+    item_code,
+    item_name,
+    SUM(packs) as packs,
+    SUM(weight) as weight,
+    SUM(total) as total
+");
+
+        // Apply date range filter if needed
+        if ($dateColumn) {
+            $query->whereBetween($dateColumn, [
+                Carbon::parse($startDate)->startOfDay(),
+                Carbon::parse($endDate)->endOfDay()
+            ]);
+        }
+
+        // Apply supplier filter
+        if (!empty($supplierCode)) {
+            $query->where('supplier_code', $supplierCode);
+        }
+
+        // Apply GRN filter
+        if (!empty($grnCode)) {
+            $query->where('code', $grnCode);
+        }
+
+        // Group by item_code and item_name
+        $weightBasedReportData = $query->groupBy('item_code', 'item_name')->get();
+
+        // Join items separately to calculate pack_due correctly
+        $weightBasedReportData = $weightBasedReportData->map(function ($sale) {
+            $item = Item::where('no', $sale->item_code)->first();
+            $sale->pack_due = $item ? $item->pack_due : 0;
+            return $sale;
+        });
+
+        // Calculate final total (sum of totals)
+        $final_total = $weightBasedReportData->sum('total');
 
         // --- Sales by Bill ---
-        $salesByBill = Sale::query()
-            ->whereNotNull('bill_no')
-            ->where('bill_no', '<>', '')
-            ->get()
-            ->groupBy('bill_no');
+        $salesByBill = Sale::all()->groupBy('customer_code');
 
         // --- Sales Adjustments ---
         $settingDate = Setting::value('value');
@@ -775,7 +828,7 @@ public function dayStart(Request $request)
             ->get();
 
         // --- Financial Report Data ---
-        $financialRecords = IncomeExpenses::select(
+      $financialRecords = IncomeExpenses::select(
             'customer_short_name',
             'bill_no',
             'description',
@@ -816,8 +869,16 @@ public function dayStart(Request $request)
             }
         }
 
-        // Always add Sales Total (even if no IncomeExpenses)
-        $salesTotal = Sale::sum('total');
+        // --- Sales and Profit (Filtered by $settingDate) ---
+
+        // 1. Get all sales for the specific date
+        // (Assuming 'Date' column exists. If not, use 'created_at')
+        $sales = Sale::whereDate('Date', $settingDate)->get();
+
+        // 2. Get Sales Total from the collection (efficient)
+        $salesTotal = $sales->sum('total');
+
+        // 3. Add Sales Total to the report
         if ($salesTotal > 0) {
             $totalDr += $salesTotal;
             $financialReportData[] = [
@@ -826,10 +887,62 @@ public function dayStart(Request $request)
                 'cr' => null
             ];
         }
+        
+        // 4. Get unique codes from *these* sales to fetch GRN data
+        $saleCodes = $sales->pluck('code')->unique()->filter();
 
-        // Profit and Damages
-        $profitTotal = Sale::sum('SellingKGTotal') ?? 0;
-        $totalDamages = GrnEntry::select(DB::raw('SUM(wasted_weight * PerKGPrice)'))
+        // 5. Fetch all matching GrnEntries in ONE query and map them
+        $grnEntriesMap = collect(); // Initialize empty
+        if ($saleCodes->isNotEmpty()) {
+            $grnEntriesMap = GrnEntry::whereIn('code', $saleCodes)
+                ->get()
+                ->keyBy('code');
+        }
+
+        // 6. Loop through each sale to calculate profit
+        $totalProfit = 0;
+        $profitDetails = []; // You can pass this to the view if needed
+
+        foreach ($sales as $sale) {
+            
+            // 7. Find the matching GrnEntry from our map
+            $grnEntry = $grnEntriesMap->get($sale->code);
+
+            // 8. Get the cost price (BP)
+            $costPrice = $grnEntry ? $grnEntry->BP : null;
+
+            // 9. Skip records with invalid data
+            if (
+                !is_null($sale->price_per_kg) &&
+                $sale->price_per_kg > 0 &&
+                !is_null($costPrice) &&
+                $costPrice > 0 &&
+                !is_null($sale->weight) &&
+                $sale->weight > 0
+            ) {
+                // 10. Calculate profit: (selling - cost) × weight
+                $profitPerRecord = abs($sale->price_per_kg - $costPrice) * $sale->weight;
+                $totalProfit += $profitPerRecord;
+
+                // (Optional: You can still build this array if your view needs it)
+                $profitDetails[] = [
+                    'bill_no' => $sale->bill_no,
+                    'item_name' => $sale->item_name,
+                    'weight' => $sale->weight,
+                    'selling_price_per_kg' => $sale->price_per_kg,
+                    'cost_price_per_kg' => $costPrice,
+                    'profit' => $profitPerRecord
+                ];
+            }
+        }
+
+        // 11. Assign the calculated profit to the $profitTotal variable
+        $profitTotal = $totalProfit;
+
+        // 12. Corrected Damages to also use the date filter
+        // (Assuming damage is recorded on 'created_at'. Adjust if you have a 'Date' column)
+        $totalDamages = GrnEntry::whereDate('created_at', $settingDate)
+            ->select(DB::raw('SUM(wasted_weight * PerKGPrice)'))
             ->value(DB::raw('SUM(wasted_weight * PerKGPrice)')) ?? 0;
 
         // --- Customers Loans ---
@@ -846,7 +959,7 @@ public function dayStart(Request $request)
                     return $l->loan_type === 'today' &&
                         Carbon::parse($l->created_at) > (
                             $lastOldLoan ? Carbon::parse($lastOldLoan->created_at)
-                                         : Carbon::parse('1970-01-01')
+                            : Carbon::parse('1970-01-01')
                         );
                 })->sortBy(fn($l) => Carbon::parse($l->created_at))
                     ->first();
@@ -887,48 +1000,128 @@ public function dayStart(Request $request)
                     'highlight_color' => $highlightColor,
                 ]);
             }
+        } // This closing brace was misplaced in your provided code. I moved it up.
+          // The code block below was inside the `if ($allLoans->isNotEmpty())` block, which is likely wrong.
+
+        // --- ⬇️ NEW: Generate GRN Sales Report, Loan & Expense Summary Data ⬇️ ---
+
+        // This uses the Sale model, assuming it contains the day's sales *before* truncation
+        $salesAggQuery = Sale::select(
+            'sales.code',
+            DB::raw('SUM(sales.weight) AS sold_weight'),
+            DB::raw('SUM(sales.packs) AS sold_packs'),
+            DB::raw('SUM(grn_entries.BP * sales.weight) AS total_cost')
+        )
+            ->join('grn_entries', 'sales.code', '=', 'grn_entries.code')
+            ->groupBy('sales.code');
+
+        $grnSalesReport_data = GrnEntry::select([
+            'grn_entries.code',
+            'grn_entries.item_name',
+            DB::raw('COALESCE(s.sold_weight, 0) AS sold_weight'),
+            DB::raw('COALESCE(s.sold_packs, 0) AS sold_packs'),
+            'grn_entries.SalesKGPrice AS selling_price',
+            DB::raw('COALESCE(s.total_cost, 0) AS total_cost'),
+            DB::raw('COALESCE(grn_entries.SalesKGPrice, 0) * COALESCE(s.sold_weight, 0) AS netsale')
+        ])
+            ->leftJoinSub($salesAggQuery, 's', function ($join) {
+                $join->on('s.code', '=', 'grn_entries.code');
+            })
+            // Only include items that were actually sold
+            ->whereNotNull('s.sold_weight')
+            ->orderBy('grn_entries.code')->get();
+
+        // --- Fetch Loan/Expense Totals for the summary cards ---
+        // (This uses $settingDate, consistent with your financial report)
+        $baseIncomeExpenseQuery = IncomeExpenses::query()
+            ->whereDate('Date', $settingDate);
+
+        // 1. Calculate Loan Totals for Summary Card
+        $loanTotals = (clone $baseIncomeExpenseQuery)
+            ->select('loan_type', DB::raw('SUM(amount) as total_amount'))
+            ->whereIn('loan_type', ['today', 'old'])
+            ->groupBy('loan_type')
+            ->pluck('total_amount', 'loan_type');
+
+        $grnSales_todayLoanTotal_data = $loanTotals->get('today', 0);
+        $grnSales_oldLoanTotal_data = $loanTotals->get('old', 0);
+
+        // 2. Calculate Expense Category Totals for Summary Card
+        $grnSales_expenseCategories_data = (clone $baseIncomeExpenseQuery)
+            ->select(
+                DB::raw("SUBSTRING_INDEX(description, '-', 1) as category"),
+                DB::raw("SUM(amount) as total_amount")
+            )
+            ->where('loan_type', 'Outgoing')
+            ->where('description', 'LIKE', '%-%')
+            ->groupBy('category')
+            ->get();
+
+        // --- ⬆️ END OF NEW BLOCK ⬆️ ---
+
+
+        // --- Send Combined Emails (with individual error handling) ---
+
+        // ⬇️ WRAPPED IN ITS OWN TRY-CATCH ⬇️
+        try {
+            Mail::send(new CombinedReportsMail(
+                $dayStartReportData,
+                $grnReportData,
+                $grnEntries,
+                $dayStartDate,
+                $weightBasedReportData,
+
+                salesByBill: $salesByBill,
+                salesadjustments: $salesadjustments,
+                financialReportData: $financialReportData,
+                financialTotalDr: $totalDr,
+                financialTotalCr: $totalCr,
+                financialProfit: $profitTotal,
+                financialDamages: $totalDamages,
+                profitTotal: $profitTotal,
+                totalDamages: $totalDamages,
+                loans: $allLoans,
+                finalLoans: $finalLoans,
+                final_total: $final_total,
+            ));
+        } catch (\Exception $e) {
+            // Log email failure but DO NOT stop the transaction
+            Log::error('Day Start: Failed to send CombinedReportsMail. ' . $e->getMessage());
         }
 
-        // --- Send Combined Emails ---
-        Mail::send(new CombinedReportsMail(
-            $dayStartReportData,
-            $grnReportData,
-            $grnEntries,
-            $dayStartDate,
-            $weightBasedReportData,
-            salesByBill: $salesByBill,
-            salesadjustments: $salesadjustments,
-            financialReportData: $financialReportData,
-            financialTotalDr: $totalDr,
-            financialTotalCr: $totalCr,
-            financialProfit: $profitTotal,
-            financialDamages: $totalDamages,
-            profitTotal: $profitTotal,
-            totalDamages: $totalDamages,
-            loans: $allLoans,
-            finalLoans: $finalLoans,
-        ));
+        // ⬇️ WRAPPED IN ITS OWN TRY-CATCH ⬇️
+        try {
+            Mail::send(new CombinedReportsMail2(
+                $dayStartReportData,
+                $grnReportData,
+                $grnEntries, // Note: Your Mailable expects $salesReportData as 3rd param
+                $dayStartDate,
+                $weightBasedReportData,
+                salesByBill: $salesByBill,
+                salesadjustments: $salesadjustments,
+                financialReportData: $financialReportData,
+                financialTotalDr: $totalDr,
+                financialTotalCr: $totalCr,
+                financialProfit: $profitTotal,
+                financialDamages: $totalDamages,
+                profitTotal: $profitTotal,
+                totalDamages: $totalDamages,
+                loans: $allLoans,
+                finalLoans: $finalLoans,
 
-        Mail::send(new CombinedReportsMail2(
-            $dayStartReportData,
-            $grnReportData,
-            $grnEntries,
-            $dayStartDate,
-            $weightBasedReportData,
-            salesByBill: $salesByBill,
-            salesadjustments: $salesadjustments,
-            financialReportData: $financialReportData,
-            financialTotalDr: $totalDr,
-            financialTotalCr: $totalCr,
-            financialProfit: $profitTotal,
-            financialDamages: $totalDamages,
-            profitTotal: $profitTotal,
-            totalDamages: $totalDamages,
-            loans: $allLoans,
-            finalLoans: $finalLoans,
-        ));
+                // --- NEW PARAMETERS ADDED HERE ---
+                grnSalesReport: $grnSalesReport_data,
+                grnSales_todayLoanTotal: $grnSales_todayLoanTotal_data,
+                grnSales_oldLoanTotal: $grnSales_oldLoanTotal_data,
+                grnSales_expenseCategories: $grnSales_expenseCategories_data
+            ));
+        } catch (\Exception $e) {
+            // Log email failure but DO NOT stop the transaction
+            Log::error('Day Start: Failed to send CombinedReportsMail2. ' . $e->getMessage());
+        }
 
         // --- Archive Sales and Clear Table ---
+        // This code will NOW RUN even if the emails failed
         if ($grnEntries->isNotEmpty()) {
             $sales = Sale::all();
             if ($sales->isNotEmpty()) {
@@ -962,26 +1155,27 @@ public function dayStart(Request $request)
             }
         }
 
-         // --- Update Day Start Date in Settings ---
+        // --- Update Day Start Date in Settings ---
         Setting::updateOrCreate(
-    ['key' => 'last_day_started_date'], // matching condition
-    [
-        'value' => $dayStartDate->format('Y-m-d'),
-       
-    ]
-);
+            ['key' => 'last_day_started_date'], // matching condition
+            [
+                'value' => $dayStartDate->format('Y-m-d'),
 
+            ]
+        );
 
+        // All database operations were successful, commit them
         DB::commit();
 
         return redirect()->back()->with(
             'success',
-            'Day started for ' . $dayStartDate->format('Y-m-d') . '. Reports sent successfully.'
+            'Day started for ' . $dayStartDate->format('Y-m-d') . '. Reports processed and sales archived.'
         );
     } catch (\Exception $e) {
+        // This will now only catch critical errors (like database failures)
         DB::rollBack();
-        Log::error('Day Start Failed: ' . $e->getMessage());
-        return redirect()->back();
+        Log::error('Day Start Failed Critically: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'A critical error occurred. Day start was rolled back. Error: ' . $e->getMessage());
     }
 }
 
@@ -1156,9 +1350,9 @@ public function updateGivenAmount(Request $request, Sale $sale)
         'given_amount' => 'required|numeric|min:0',
     ]);
 
-    // 🔹 Add instead of replace
+    // 🔹 Update this specific sale's given_amount with the full amount
     $sale->update([
-        'given_amount' => $sale->given_amount + $validated['given_amount']
+        'given_amount' => $validated['given_amount'] // Store the original full amount
     ]);
 
     return response()->json([

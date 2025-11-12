@@ -178,41 +178,48 @@
                     No loan records found.
                 </div>
             @else
-                <table class="table table-bordered table-striped table-hover table-sm mb-0">
-                    <thead>
-                        <tr>
-                            <th>පාරිභෝගික නම</th>
-                            <th>මුදල</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($loans as $loan)
-                            <tr class="{{ $loan->highlight_color ?? '' }}">
-                                <td>{{ $loan->customer_short_name }}</td>
-                                <td>{{ number_format($loan->total_amount, 2) }}</td>
+               <table class="table table-bordered table-striped table-hover table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>කෙටි නම</th>
+                                <th>සම්පූර්ණ නම</th>
+                                <th>දුරකථන අංකය</th>
+                                <th>ණය සීමාව (Rs.)</th>
+                                <th>මුදල</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th class="text-end">Grand Total:</th>
-                            <th>
-                                {{
-                                    number_format($loans->sum(function($loan) {
-                                        return $loan->total_amount;
-                                    }), 2)
-                                }}
-                            </th>
-                        </tr>
-                    </tfoot>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach ($loans as $loan)
+                                <tr class="{{ $loan->highlight_color ?? '' }}">
+                                    <td>{{ $loan->customer_short_name }}</td>
+                                    <td>{{ $loan->customer_name }}</td>
+                                    <td>{{ $loan->telephone_no }}</td>
+                                    <td>Rs. {{ number_format($loan->credit_limit, 2) }}</td>
+                                    <td>{{ number_format($loan->total_amount, 2) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="4" class="text-end">Grand Total:</th>
+                                <th>
+                                    {{ number_format($loans->sum('total_amount'), 2) }}
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
 
                 <!-- Legend -->
-                <div class="legend mt-2">
-                    <span class="orange-box"></span> Non realized cheques &nbsp; 
-                    <span class="blue-box"></span> Realized cheques &nbsp; 
-                    <span class="red-box"></span> Returned cheques
-                </div>
+                  <div class="legend mt-4 mb-3">
+    <span class="orange-box"></span> Non realized cheques &nbsp;
+    <span class="blue-box"></span> Realized cheques &nbsp;
+    <span class="red-box"></span> Returned cheques
+</div>
+
+<div class="text-start mb-3 mt-3">
+    <a href="{{ route('loans.export.pdf') }}" class="btn btn-danger">📥 PDF</a>
+    <a href="{{ route('loans.export.excel') }}" class="btn btn-success">📥 Excel</a>
+</div>
             @endif
         </div>
     </div>

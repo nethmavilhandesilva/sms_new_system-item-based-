@@ -61,7 +61,7 @@
         </div>
 
         <div class="mb-3">
-            <label for="pack_cost" class="form-label">මල්ලක අගය</label>
+            <label for="pack_cost" class="form-label">මිලදි ගැනීමේ අගය</label>
             <input type="number" name="pack_cost" id="pack_cost" step="0.01" class="form-control" value="{{ old('pack_cost', $item->pack_cost) }}" required>
         </div>
 

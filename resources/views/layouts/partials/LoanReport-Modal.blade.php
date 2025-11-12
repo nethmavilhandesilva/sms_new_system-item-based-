@@ -1,6 +1,6 @@
 <div class="modal fade" id="reportLoanModal" tabindex="-1" aria-labelledby="reportLoanModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form action="{{ route('loan.report.results') }}" method="POST" target="_blank">
+    <form id="loanReportForm" action="{{ route('loan.report.results') }}" method="POST" target="_blank">
       @csrf
       <div class="modal-content" style="background-color: #99ff99;">
         <div class="modal-header">
@@ -20,7 +20,7 @@
               <option value="">-- ගැනුම්කරු --</option>
               @foreach ($customers as $customer)
                 <option value="{{ $customer->short_name }}">
-                  {{ $customer->short_name }} | {{ $customer->name }}
+                  {{ $customer->short_name }}
                 </option>
               @endforeach
             </select>
@@ -40,9 +40,9 @@
         </div>
 
         <div class="modal-footer">
-             <a href="{{ route('report.loans.email-simple') }}" class="print-btn" style="text-decoration: none;">
-        📧 Email Report
-    </a>
+          <a href="{{ route('report.loans.email-simple') }}" class="print-btn" style="text-decoration: none;">
+            📧 Email Report
+          </a>
           <button type="submit" class="btn btn-primary w-100">ඉදිරිපත් කරන්න</button>
         </div>
       </div>
@@ -53,26 +53,50 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const customerSelect = document.getElementById('loanReport_customer_select');
     const passwordInput = document.getElementById('loanReport_password');
     const dateRangeContainer = document.getElementById('loanReport_date_range_container');
     const correctPassword = 'nethma123';
+    const form = document.getElementById('loanReportForm');
 
-    // Initialize Select2 with dropdownParent
+    // Initialize Select2 inside modal with custom matcher
     $(customerSelect).select2({
-      dropdownParent: $('#reportLoanModal')
+        dropdownParent: $('#reportLoanModal'),
+        matcher: function(params, data) {
+            if ($.trim(params.term) === '') {
+                return data; // Show all options if search is empty
+            }
+            if (data.id) { // data.id = short_name
+                const term = params.term.toLowerCase();
+                const shortName = data.id.toLowerCase();
+                if (shortName.startsWith(term)) {
+                    return data; // Match first letters of short_name
+                }
+            }
+            return null; // No match
+        }
     });
 
-    // Show/hide date range fields on password input
+    // Password show/hide date range
     passwordInput.addEventListener('input', function () {
-      if (passwordInput.value === correctPassword) {
-        dateRangeContainer.style.display = 'block';
-      } else {
-        dateRangeContainer.style.display = 'none';
-        document.getElementById('loanReport_start_date').value = '';
-        document.getElementById('loanReport_end_date').value = '';
-      }
+        if (passwordInput.value === correctPassword) {
+            dateRangeContainer.style.display = 'block';
+        } else {
+            dateRangeContainer.style.display = 'none';
+            document.getElementById('loanReport_start_date').value = '';
+            document.getElementById('loanReport_end_date').value = '';
+        }
     });
-  });
+
+    // Prevent form submit if customer not selected
+    form.addEventListener('submit', function (e) {
+        if (customerSelect.value === "") {
+            e.preventDefault();
+            alert("කරුණාකර ගැනුම්කරු තෝරන්න"); // Sinhala alert message
+        }
+    });
+});
 </script>
+
+

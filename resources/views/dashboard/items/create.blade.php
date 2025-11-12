@@ -48,7 +48,7 @@
                         <input type="text" id="type" name="type" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label for="pack_cost" class="form-label">මල්ලක අගය</label>
+                        <label for="pack_cost" class="form-label">මිලදි ගැනීමේ අගය</label>
                         <input type="number" id="pack_cost" name="pack_cost" step="0.01" class="form-control" required>
                     </div>
                     <div class="mb-3">

@@ -66,17 +66,53 @@
             border: none;
             font-weight: bold;
         }
+
+        /* 🖨️ Hide sidebar and buttons when printing */
+        @media print {
+
+            .sidebar,
+            .navbar,
+            .print-btn,
+            .alert-info,
+            a.print-btn {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            .report-card {
+                box-shadow: none;
+                color: black !important;
+                background-color: white !important;
+            }
+
+            table {
+                color: black !important;
+                background-color: white !important;
+            }
+
+            thead th {
+                background-color: #ddd !important;
+                color: black !important;
+            }
+
+            tfoot tr.table-warning td {
+                background-color: #f0f0f0 !important;
+                color: black !important;
+            }
+        }
     </style>
 
     <div class="container mt-4 report-card">
         <div class="report-title-bar">
             <div>
-               @php
-    $companyName = \App\Models\Setting::value('CompanyName');
-@endphp
-
-<h2 class="company-name">{{ $companyName ?? 'Default Company' }}</h2>
-
+                @php
+                    $companyName = \App\Models\Setting::value('CompanyName');
+                @endphp
+                <h2 class="company-name">{{ $companyName ?? 'Default Company' }}</h2>
                 <h4 class="fw-bold">📄 විකුණුම් වාර්තාව</h4>
             </div>
             <div>
@@ -104,24 +140,22 @@
                     <th>ගෙවීම</th>
                 </tr>
             </thead>
-          <tbody>
-    {{-- Loop through all report data, including Balance row from controller --}}
-    @foreach($reportData as $row)
-        <tr>
-            <td>{{ $row['description'] }}</td>
-            <td>{{ $row['dr'] ? number_format(abs($row['dr']), 2) : '' }}</td>
-            <td>{{ $row['cr'] ? number_format(abs($row['cr']), 2) : '' }}</td>
-        </tr>
-    @endforeach
-</tbody>
+            <tbody>
+                {{-- Loop through all report data, including Balance row from controller --}}
+                @foreach($reportData as $row)
+                    <tr>
+                        <td>{{ $row['description'] }}</td>
+                        <td>{{ $row['dr'] ? number_format(abs($row['dr']), 2) : '' }}</td>
+                        <td>{{ $row['cr'] ? number_format(abs($row['cr']), 2) : '' }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
 
             <tfoot>
                 <tr class="fw-bold">
                     <td>Total</td>
                     <td>{{ number_format(abs($totalDr), 2) }}</td>
-
-                  <td>{{ number_format(abs($totalCr), 2) }}</td>
-
+                    <td>{{ number_format(abs($totalCr), 2) }}</td>
                 </tr>
                 <tr class="fw-bold table-warning">
                     <td>ඇතැති මුදල්</td>
@@ -136,39 +170,90 @@
                         @endif
                     </td>
                 </tr>
-               <tr class="fw-bold table-warning" id="profit-row">
-    <td>💰 Profit</td>
-    <td colspan="2" class="text-success">
-        <span id="profit-value" style="display: none;">
-            {{ number_format($profitTotal, 2) }}
-        </span>
-
-        <input type="password" id="profit-password" placeholder="Enter password" style="padding:2px 5px;" />
-    </td>
-</tr>
+                <tr class="fw-bold table-warning" id="profit-row">
+                    <td>💰 Profit</td>
+                    <td colspan="2" class="text-success">
+                        <span id="profit-value" style="display: none;">
+                            {{ number_format($totalProfit, 2) }}
+                            <br>
+                           
+                        </span>
+                        <input type="password" id="profit-password" placeholder="Enter password" style="padding:2px 5px;" />
+                    </td>
+                </tr>
                 <tr class="fw-bold table-warning">
                     <td>Total Damages</td>
                     <td colspan="2" class="text-danger">
                         {{ number_format($totalDamages, 2) }}
                     </td>
-                   
                 </tr>
-              
+                <tr class="fw-bold table-warning">
+                    <td colspan="3">
+                        <div style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                            <div
+                                style="flex:1; background-color:#004d00; padding:10px; border-radius:5px; text-align:center; color:white;">
+                                අද දින පරණ නය <br>
+                                <strong>{{ $totalOldLoans }}</strong>
+                            </div>
+                            <div
+                                style="flex:1; background-color:#006600; padding:10px; border-radius:5px; text-align:center; color:white;">
+                               අද දින නය ගැනීම<br>
+                               <strong>{{ abs($totaltodayLoans) }}</strong>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="fw-bold table-warning">
+                    <td colspan="3">
+                        <div style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                            <div
+                                style="flex:1; background-color:#004d00; padding:10px; border-radius:5px; text-align:center; color:white;">
+                                Total Qty Sold<br>
+                                <strong>{{ number_format($totalQtySold, 2) }}</strong>
+                            </div>
+                            <div
+                                style="flex:1; background-color:#006600; padding:10px; border-radius:5px; text-align:center; color:white;">
+                                Total Bills Printed<br>
+                                <strong>{{ $totalBillsPrinted }}</strong>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="fw-bold table-warning">
+                    <td colspan="3">
+                        <div style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                            <div
+                                style="flex:1; background-color:#003300; padding:10px; border-radius:5px; text-align:center; color:white;">
+                                First Bill Printed Time<br>
+                                <strong>{{ $firstBillTime }}</strong><br>
+                                <small>(Bill No: {{ $firstBillNo }})</small>
+                            </div>
+                            <div
+                                style="flex:1; background-color:#005500; padding:10px; border-radius:5px; text-align:center; color:white;">
+                                Last Bill Printed Time<br>
+                                <strong>{{ $lastBillTime }}</strong><br>
+                                <small>(Bill No: {{ $lastBillNo }})</small>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
             </tfoot>
         </table>
-          <a href="{{ route('send.financial.report') }}" class="print-btn" style="text-decoration: none;">
-                    📧 Send Email
-                </a>
-    </div>
-    <script>
-    const profitInput = document.getElementById("profit-password");
-    const profitValue = document.getElementById("profit-value");
 
-    profitInput.addEventListener("input", function() {
-        if(this.value === "nethma123") {
-            profitValue.style.display = "";
-            this.style.display = "none"; // hide input after correct password
-        }
-    });
-</script>
+        <a href="{{ route('send.financial.report') }}" class="print-btn" style="text-decoration: none;">
+            📧 Send Email
+        </a>
+    </div>
+
+    <script>
+        const profitInput = document.getElementById("profit-password");
+        const profitValue = document.getElementById("profit-value");
+
+        profitInput.addEventListener("input", function () {
+            if (this.value === "nethma123") {
+                profitValue.style.display = "";
+                this.style.display = "none"; // hide input after correct password
+            }
+        });
+    </script>
 @endsection
