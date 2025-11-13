@@ -191,20 +191,7 @@
                 </div>
                 
                 <!-- GRN Button -->
-                <div class="nav-item">
-                    <a href="{{ route('grn.create') }}" class="nav-link-custom">
-                        <span class="material-icons">receipt_long</span>
-                        <span>GRN</span>
-                    </a>
-                </div>
-                
-                <!-- GRN Update -->
-                <div class="nav-item">
-                    <a href="{{ route('grn.updateform') }}" class="nav-link-custom">
-                        <span class="material-icons">receipt_long</span>
-                        <span>GRN අලුත් කිරීම</span>
-                    </a>
-                </div>
+              
             </div>
 
             <!-- Right side items -->
@@ -271,22 +258,7 @@
                         වෙනස් කිරීම
                     </a>
                 </div>
-               <div class="nav-item">
-                        <a href="#" class="nav-link-custom" data-bs-toggle="modal" data-bs-target="#supplierSelectModal"
-                            data-report-action="{{ route('report.grn.sales.overview') }}"
-                            data-report-name="GRN Sales Overview Report 1">
-                             ඉතිරි වාර්තාව 1
-                        </a>
-                    </div>
-
-
-                    <div class="nav-item">
-                        <a href="#" class="nav-link-custom" data-bs-toggle="modal" data-bs-target="#supplierSelectModal"
-                            data-report-action="{{ route('report.grn.sales.overview2') }}"
-                            data-report-name="GRN Sales Overview Report 2">
-                             ඉතිරි වාර්තාව 2
-                        </a>
-                    </div>
+             
                 <div class="nav-item">
                     <a href="#" data-bs-toggle="modal" data-bs-target="#filterModal" class="nav-link-custom">
                         විකුණුම් වාර්තාව

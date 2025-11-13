@@ -213,18 +213,18 @@ export default function SalesEntry() {
   });
   //use te above data as initial data
   const initialData = getInitialData();
-  //Cursor Focussin order metod  
+  //Cursor Focussin order metod   
   const refs = {
-    customerCode: useRef(null),   // 0
-    customerSelect: useRef(null),   // 1
-    givenAmount: useRef(null),      // 2
-    supplierCode: useRef(null),     // 3 (🔹 ADDED)
-    itemCodeSelect: useRef(null),   // 4 (🔹 ADDED)
-    itemName: useRef(null),         // 5
-    weight: useRef(null),         // 6
-    pricePerKg: useRef(null),       // 7
-    packs: useRef(null),          // 8
-    total: useRef(null)           // 9
+    customerCode: useRef(null),    // 0
+    customerSelect: useRef(null),    // 1
+    givenAmount: useRef(null),       // 2
+    supplierCode: useRef(null),      // 3 (🔹 ADDED)
+    itemCodeSelect: useRef(null),    // 4 (🔹 ADDED)
+    itemName: useRef(null),          // 5
+    weight: useRef(null),          // 6
+    pricePerKg: useRef(null),        // 7
+    packs: useRef(null),           // 8
+    total: useRef(null)            // 9
     // 🔹 REMOVED: grnSelect: useRef(null),
   };
 
@@ -254,7 +254,7 @@ export default function SalesEntry() {
     itemSearchInput: "", // 🔹 ADDED
     supplierSearchInput: "", // 🔹 ADDED
     currentBillNo: null
-    // 🔹 REMOVED: grnSearchInput: "", balanceInfo, realTimeGrnEntries
+    // 🔹 REMOVED: grnSearchInput, balanceInfo, realTimeGrnEntries
   });
 
   const setFormData = (updater) => setState(prev => ({
@@ -603,7 +603,7 @@ export default function SalesEntry() {
 
     try {
       // Laravel RESTful delete route
-      const url = `/sms/sales/${editingSaleId}`;
+      const url = `/sales/${editingSaleId}`;
 
       await apiCall(url, "DELETE");
 
@@ -782,7 +782,7 @@ export default function SalesEntry() {
         ...(billNoToUse && { bill_no: billNoToUse })
       };
 
-      const url = isEditing ? `/sms/sales/${editingSaleId}` : initialData.storeUrl;
+      const url = isEditing ? `/sales/${editingSaleId}` : initialData.storeUrl;
       const method = isEditing ? "PUT" : "POST";
       const data = await apiCall(url, method, payload);
       let newSale = isEditing ? data.sale : data.data || {};
@@ -931,7 +931,7 @@ export default function SalesEntry() {
     if (!saleId || !window.confirm("Are you sure you want to delete this sales record?")) return;
 
     try {
-      const url = `/sms/sales/${saleId}`;
+      const url = `/sales/${saleId}`;
       await apiCall(url, "DELETE");
 
       updateState({
@@ -1055,9 +1055,7 @@ export default function SalesEntry() {
 
     return `<div class="receipt-container" style="width:100%;max-width:300px;margin:0 auto;padding:5px;">
       <div style="text-align:center;margin-bottom:5px;">
-        <h3 style="font-size:1.8em;font-weight:bold;margin:0;"><span style="border:2px solid #000;padding:0.1em 0.3em;display:inline-block;margin-right:5px;">B32</span>TAG ට්‍රේඩර්ස්</h3>
-        <p style="margin:0;font-size:0.7em; white-space: nowrap;"> අල, ෆී ළූනු, කුළුබඩු තොග ගෙන්වන්නෝ/බෙදාහරින්නෝ</p>
-        <p style="margin:0;font-size:0.7em;">වි.ආ.ම. වේයන්ගොඩ</p>
+        <h3 style="font-size:1.8em;font-weight:bold;margin:0;">NVDS</h3>
       </div>
       <div style="text-align:left;margin-bottom:5px;">
         <table style="width:100%;font-size:9px;border-collapse:collapse;">
@@ -1123,7 +1121,7 @@ export default function SalesEntry() {
 
       const customerCode = salesData[0].customer_code || "N/A";
       const customerName = customerCode;
-      const mobile = salesData[0].mobile || '0773358518';
+      const mobile = salesData[0].mobile || '0702758908';
       const billNo = printResponse.value.bill_no || "";
 
       let globalLoanAmount = 0;
@@ -1201,86 +1199,50 @@ export default function SalesEntry() {
               <input type="text" readOnly value={`Loan: Rs. ${loanAmount < 0 ? formatDecimal(Math.abs(loanAmount)) : formatDecimal(loanAmount)}`} placeholder="Loan Amount" className="px-4 py-2 border rounded-xl bg-yellow-100 text-red-600 font-bold " />
             </div>
 
-            {/* 🔹🔹 REPLACEMENT FIELDS START 🔹🔹 */}
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                id="supplier_code"
-                ref={refs.supplierCode}
-                name="supplier_code"
-                value={formData.supplier_code}
-                onChange={(e) => handleInputChange("supplier_code", e.target.value.toUpperCase())}
-                onKeyDown={(e) => handleKeyDown(e, 3)} // Index 3
-                type="text"
-                placeholder="Supplier Code (Type new or existing)"
-                className="px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-300 uppercase font-bold text-[20px]"
-                maxLength={10}
-              />
-              <Select
-                id="item_code_select"
-                ref={refs.itemCodeSelect}
-                value={formData.item_code ? {
-                  value: formData.item_code,
-                  label: `${formData.item_name} (${formData.item_code})`,
-                  item: { no: formData.item_code, type: formData.item_name, pack_due: formData.pack_due }
-                } : null}
-                onChange={handleItemSelect}
-                options={initialData.items
-                  .filter(item => {
-                    // Filter based on search input
-                    if (!state.itemSearchInput) return true; // Show all if no search
-                    const search = state.itemSearchInput.toLowerCase();
-                    return (
-                      String(item.no).toLowerCase().startsWith(search) || // 🔹 CHANGED
-                      String(item.type).toLowerCase().includes(search)
-                    );
-                  })
-                  .map(item => ({
-                    value: item.no,
-                    label: `${item.type} (${item.no})`,
-                    item: item // Pass the full item object
-                  }))}
-                onInputChange={(inputValue) => updateState({ itemSearchInput: inputValue })}
-                inputValue={state.itemSearchInput}
-                onKeyDown={(e) => handleKeyDown(e, 4)} // Index 4
-                placeholder="-- Select Item --"
-                isClearable
-                isSearchable
-                className="rounded-xl font-bold text-[20px]"
-                styles={{
-                  control: base => ({ ...base, minHeight: "44px", height: "44px", borderRadius: "0.75rem" }),
-                  valueContainer: base => ({ ...base, padding: "0 8px", height: "44px", flex: 1, display: "flex", alignItems: "center", overflow: "hidden" }),
-                  placeholder: base => ({ ...base, fontSize: "1rem" }),
-                  menuList: (base) => ({ ...base, maxHeight: "300px" }),
-                }}
-              />
-            </div>
-            {/* 🔹🔹 REPLACEMENT FIELDS END 🔹🔹 */}
+            {/* 🔹🔹 MODIFIED: COMBINED 6-FIELD ROW START 🔹🔹 */}
+            <div className="flex items-start gap-2">
 
+              {/* 1. Supplier Code */}
+              <div className="flex flex-col flex-1 min-w-0"> {/* flex-1 to grow/shrink */}
+                <input id="supplier_code" ref={refs.supplierCode} name="supplier_code" value={formData.supplier_code} onChange={(e) => handleInputChange("supplier_code", e.target.value.toUpperCase())} onKeyDown={(e) => handleKeyDown(e, 3)} type="text" placeholder="Supplier" className="px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-300 uppercase font-bold text-lg w-[140px]" maxLength={10} />
 
-            {/* 🔹 REMOVED: Old GRN Entry Select */}
-
-
-            <div className="flex items-start gap-3">
-              <div className="flex flex-col">
-                <input id="item_name" ref={refs.itemName} type="text" value={formData.item_name} readOnly placeholder="අයිතමයේ නාමය" onKeyDown={(e) => handleKeyDown(e, 5)} className="px-4 py-3 border border-gray-400 rounded-xl text-lg font-semibold text-black w-45 bg-gray-100 overflow-x-auto whitespace-nowrap" />
+                <span className="text-sm mt-1 text-center invisible">Placeholder</span> {/* Added for alignment */}
               </div>
+
+              {/* 2. Item Select */}
+              <div className="flex flex-col flex-1 min-w-0"> {/* flex-1 to grow/shrink */}
+            <Select id="item_code_select" ref={refs.itemCodeSelect} value={formData.item_code ? { value: formData.item_code, label: `${formData.item_name} (${formData.item_code})`, item: { no: formData.item_code, type: formData.item_name, pack_due: formData.pack_due } } : null} onChange={handleItemSelect} options={initialData.items.filter(item => { if (!state.itemSearchInput) return true; const search = state.itemSearchInput.toLowerCase(); return String(item.no).toLowerCase().startsWith(search) || String(item.type).toLowerCase().includes(search); }).map(item => ({ value: item.no, label: `${item.type} (${item.no})`, item }))} onInputChange={(inputValue) => updateState({ itemSearchInput: inputValue.toUpperCase() })} inputValue={state.itemSearchInput} onKeyDown={(e) => handleKeyDown(e, 4)} placeholder="-- Select Item --" isClearable isSearchable className="rounded-xl font-bold text-lg w-[245px] -ml-[50px]" styles={{ control: base => ({ ...base, minHeight: "42px", height: "42px", borderRadius: "0.75rem" }), valueContainer: base => ({ ...base, padding: "0 8px", height: "42px", flex: 1, display: "flex", alignItems: "center", overflow: "hidden", textTransform: "uppercase" }), input: base => ({ ...base, textTransform: "uppercase" }), placeholder: base => ({ ...base, fontSize: "1rem" }), menuList: base => ({ ...base, maxHeight: "300px" }) }} />
+                <span className="text-sm mt-1 text-center invisible">Placeholder</span> {/* Added for alignment */}
+              </div>
+              
+              {/* 3. Weight */}
               <div className="flex flex-col">
-                <input id="weight" ref={refs.weight} name="weight" type="text" value={formData.weight} onChange={(e) => { const v = e.target.value; if (/^\d*\.?\d*$/.test(v)) handleInputChange('weight', v); }} onKeyDown={(e) => handleKeyDown(e, 6)} placeholder="බර" className="px-3 py-3 border border-gray-400 rounded-3xl text-right text-lg text-[23px] font-semibold text-black overflow-x-auto whitespace-nowrap w-[120px]" maxLength="7" />
+                <input id="weight" ref={refs.weight} name="weight" type="text" value={formData.weight} onChange={(e) => { const v = e.target.value; if (/^\d*\.?\d*$/.test(v)) handleInputChange('weight', v); }} onKeyDown={(e) => handleKeyDown(e, 6)} placeholder="බර" className="px-3 py-2 border border-gray-400 rounded-2xl text-right text-lg font-semibold text-black overflow-x-auto whitespace-nowrap w-[90px]" maxLength="7" />
                 <span className="text-sm mt-1 text-center invisible">Placeholder</span>
               </div>
+              
+              {/* 4. Price */}
               <div className="flex flex-col">
-                <input id="price_per_kg" ref={refs.pricePerKg} name="price_per_kg" type="text" value={formData.price_per_kg} onChange={(e) => { const v = e.target.value; if (/^\d*\.?\d*$/.test(v)) handleInputChange('price_per_kg', v); }} onKeyDown={(e) => handleKeyDown(e, 7)} placeholder="මිල" className="px-3 py-3 border border-gray-400 rounded-3xl text-right text-lg text-[23px] font-semibold text-black overflow-x-auto whitespace-nowrap w-[120px]" maxLength="7" />
-                <span className="text-red-600 font-bold text-[18px] mt-1 text-center whitespace-nowrap inline-block">
+                <input id="price_per_kg" ref={refs.pricePerKg} name="price_per_kg" type="text" value={formData.price_per_kg} onChange={(e) => { const v = e.target.value; if (/^\d*\.?\d*$/.test(v)) handleInputChange('price_per_kg', v); }} onKeyDown={(e) => handleKeyDown(e, 7)} placeholder="මිල" className="px-3 py-2 border border-gray-400 rounded-2xl text-right text-lg font-semibold text-black overflow-x-auto whitespace-nowrap w-[90px]" maxLength="7" /> {/* py-2, text-lg, w-28, rounded-2xl */}
+                <span className="text-red-600 font-bold text-sm mt-1 text-center whitespace-nowrap"> {/* text-sm */}
                   {formatDecimal(packCost)}
                 </span>
               </div>
+              
+              {/* 5. Packs */}
               <div className="flex flex-col">
-                <input id="packs" ref={refs.packs} name="packs" type="text" value={formData.packs} onChange={(e) => { const v = e.target.value; if (/^\d*\.?\d*$/.test(v)) handleInputChange('packs', v); }} onKeyDown={(e) => handleKeyDown(e, 8)} placeholder="අසුරුම්" className="px-3 py-3 border border-gray-400 rounded-2xl text-right text-lg text-[23px] font-semibold text-black w-20 overflow-x-auto whitespace-nowrap" maxLength="4" />
+                <input id="packs" ref={refs.packs} name="packs" type="text" value={formData.packs} onChange={(e) => { const v = e.target.value; if (/^\d*\.?\d*$/.test(v)) handleInputChange('packs', v); }} onKeyDown={(e) => handleKeyDown(e, 8)} placeholder="අසුරුම්" className="px-3 py-2 border border-gray-400 rounded-2xl text-right text-lg font-semibold text-black w-20 overflow-x-auto whitespace-nowrap" maxLength="4" /> {/* py-2, text-lg */}
+                <span className="text-sm mt-1 text-center invisible">Placeholder</span> {/* Added for alignment */}
               </div>
+              
+              {/* 6. Total */}
               <div className="flex flex-col">
-                <input id="total" ref={refs.total} name="total" type="number" value={formData.total} readOnly placeholder="Total" onKeyDown={(e) => handleKeyDown(e, 9)} onInput={(e) => e.target.value.length > 6 && (e.target.value = e.target.value.slice(0, 6))} className="px-4 py-3 border border-gray-400 rounded-xl text-right text-lg text-[23px] font-semibold text-black bg-gray-100 w-[10.0rem] overflow-x-auto whitespace-nowrap" maxLength="20" />
+                <input id="total" ref={refs.total} name="total" type="number" value={formData.total} readOnly placeholder="Total" onKeyDown={(e) => handleKeyDown(e, 9)} onInput={(e) => e.target.value.length > 6 && (e.target.value = e.target.value.slice(0, 6))} className="px-3 py-2 border border-gray-400 rounded-2xl text-right text-lg font-semibold text-black overflow-x-auto whitespace-nowrap w-[110px]" maxLength="7" /> {/* py-2, text-lg, w-36 */}
+                <span className="text-sm mt-1 text-center invisible">Placeholder</span> {/* Added for alignment */}
               </div>
             </div>
+            {/* 🔹🔹 MODIFIED: COMBINED 6-FIELD ROW END 🔹🔹 */}
+
           </div>
           <div className="flex space-x-4">
             <button type="submit" style={{ display: "none" }} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition">
