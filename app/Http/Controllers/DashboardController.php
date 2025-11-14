@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\GrnEntry;
@@ -14,7 +15,7 @@ class DashboardController extends Controller
 {
     // Customers list
     $customers = Customer::select('short_name', 'name')->get();
-
+    $suppliers = Supplier::select('code','name')->get();
     // GRN entries (latest first)
    $entries = GrnEntry::where('is_hidden', 0)
     ->orderBy('txn_date', 'desc')
@@ -55,6 +56,7 @@ class DashboardController extends Controller
             'totalSum',
             'printedSales',
             'unprintedSales',
+            'suppliers',
             'items' // Add this line
         )
     );

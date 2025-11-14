@@ -172,13 +172,8 @@
                         <a class="dropdown-item" href="{{ route('customers.index') }}">ගනුදෙනුකරුවන්</a>
                         <a class="dropdown-item" href="{{ route('suppliers.index') }}">සැපයුම්කරුවන්</a>
                         <a class="dropdown-item" href="{{ route('customers-loans.report') }}">ණය වාර්තාව දැකීම</a>
-                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#codeSelectModal">
-                            GRN වාර්තාව
-                        </a>
                          <a class="dropdown-item" href="{{ route('loan.report') }}">Final Loan Report</a>
                          <a class="dropdown-item" href="{{ route('expenses.report') }}">වි‍යදම් වාර්තාව</a>
-                          <a class="dropdown-item" href="supplierSelectModal2" data-bs-toggle="modal" data-bs-target="#supplierSelectModal2">
-                               සියලු දින අනුව GRN වාර්තාව</a>
                     </div>
                 </div>
 
@@ -276,6 +271,7 @@
     // pass server data to React via window.* variables
     window.__INITIAL_SALES__ = @json($sales->toArray());
     window.__CUSTOMERS__ = @json($customers->toArray());
+    window.__Suppliers__ = @json( $suppliers->toArray());
     window.__ENTRIES__ = @json($entries->toArray());
     window.__ITEMS__ = @json($items->toArray());
     window.__STORE_URL__ = "{{ route('grn.store') }}";
