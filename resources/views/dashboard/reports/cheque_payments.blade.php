@@ -71,7 +71,7 @@ $(document).on('change', '.status-dropdown', function () {
     let status = $(this).val();
 
     $.ajax({
-        url:"https://wday.lk/AA/sms/reports/update-status/" + id,   // fixed 
+        url:"https://talentconnect.lk/AA/sms/reports/update-status/" + id,   // fixed 
         type: "POST",
         data: {
             _token: "{{ csrf_token() }}",

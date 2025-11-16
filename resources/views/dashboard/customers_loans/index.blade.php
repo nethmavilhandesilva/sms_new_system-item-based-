@@ -500,7 +500,7 @@
 
                 if (customerId && (loanType === 'today' || loanType === 'old')) {
                     $.ajax({
-                        url: `https://wday.lk/sms/customers/${customerId}/loans-total`,
+                        url: `https://talentconnect.lk/sms/customers/${customerId}/loans-total`,
                         method: 'GET',
                         success: function (response) {
                             // Parse the total amount
@@ -694,7 +694,7 @@
                 // Handle PUT action dynamically
                 if (method === 'PUT') {
                     const loanId = $('#loan_id').val();
-                    url = `https://wday.lk/sms/customers-loans/${loanId}`
+                    url = `https://talentconnect.lk/sms/customers-loans/${loanId}`
                         ; // The URL must include the ID for update
                 }
 
@@ -871,7 +871,7 @@
                 returnGrn.addEventListener('change', function () {
                     let code = this.value;
                     if (!code) return;
-                    fetch(`https://wday.lk/sms/api/grn-entry/${code}`)
+                    fetch(`https://talentconnect.lk/sms/api/grn-entry/${code}`)
                         .then(res => res.json())
                         .then(data => {
                             document.getElementById('return_item_code').value = data?.item_code || '';
@@ -879,7 +879,7 @@
                 });
             }
 
-            fetch('https://wday.lk/sms/api/all-bill-nos')
+            fetch('https://talentconnect.lk/sms/api/all-bill-nos')
                 .then(res => res.json())
                 .then(billNosObj => {
                     const returnBill = document.getElementById('return_bill_no');

@@ -770,7 +770,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedCode = $(this).val();
 
         if (selectedCode) {
-            fetch(`https://wday.lk/AA/sms/grn-entry/${selectedCode}`)
+            fetch(`https://talentconnect.lk/AA/sms/grn-entry/${selectedCode}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.per_kg_price !== null) {
@@ -1075,7 +1075,7 @@ document.addEventListener('DOMContentLoaded', function() {
     grnSelect.on('change', function() {
         const selectedCode = $(this).val();
         if (selectedCode) {
-            fetch(`https://wday.lk/AA/sms/grn-entry/${selectedCode}`)
+            fetch(`https://talentconnect.lk/AA/sms/grn-entry/${selectedCode}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.per_kg_price !== null) {
@@ -2939,7 +2939,7 @@ function populateFormForEdit(sale) {
     // This is the key part:
     // We only fetch data initially and populate the fields once.
     if (sale.code) {
-        fetch(`https://wday.lk/AA/sms/api/grn-entry/${sale.code}`)
+        fetch(`https://talentconnect.lk/AA/sms/api/grn-entry/${sale.code}`)
             .then(response => response.json())
             .then(grnData => {
                 originalGrnPacks = parseInt(grnData.packs || 0);
@@ -3067,7 +3067,7 @@ function populateFormForEdit(sale) {
 
             if (customerCode) {
                 $.ajax({
-                     url: 'https://wday.lk/AA/sms/api/sales/unprinted/' + customerCode,
+                     url: 'https://talentconnect.lk/AA/sms/api/sales/unprinted/' + customerCode,
 
                     method: 'GET',
                     success: function (response) {
@@ -3229,7 +3229,7 @@ function populateFormForEdit(sale) {
     currentFormData['_method'] = 'PUT';
     currentFormData['_token'] = '{{ csrf_token() }}';
 
-    fetch(`https://wday.lk/AA/sms/sales/update/${saleId}`, {
+    fetch(`https://talentconnect.lk/AA/sms/sales/update/${saleId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -3341,7 +3341,7 @@ function populateFormForEdit(sale) {
         return;
     }
 
-   fetch(`https://wday.lk/AA/sms/sales/delete/${saleId}`, {
+   fetch(`https://talentconnect.lk/AA/sms/sales/delete/${saleId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -200,7 +200,7 @@
             }
 
             $.ajax({
-                url: `https://wday.lk/AA/sms/grn/balance/${selectedCode}`, // hosted URL
+                url: `https://talentconnect.lk/AA/sms/grn/balance/${selectedCode}`, // hosted URL
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {

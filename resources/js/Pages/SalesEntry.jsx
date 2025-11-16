@@ -603,7 +603,7 @@ export default function SalesEntry() {
 
     try {
       // Laravel RESTful delete route
-      const url = `/sales/${editingSaleId}`;
+      const url = `/sms2/sales/${editingSaleId}`;
 
       await apiCall(url, "DELETE");
 
@@ -782,7 +782,7 @@ export default function SalesEntry() {
         ...(billNoToUse && { bill_no: billNoToUse })
       };
 
-      const url = isEditing ? `/sales/${editingSaleId}` : initialData.storeUrl;
+      const url = isEditing ? `/sms2/sales/${editingSaleId}` : initialData.storeUrl;
       const method = isEditing ? "PUT" : "POST";
       const data = await apiCall(url, method, payload);
       let newSale = isEditing ? data.sale : data.data || {};
@@ -931,7 +931,7 @@ export default function SalesEntry() {
     if (!saleId || !window.confirm("Are you sure you want to delete this sales record?")) return;
 
     try {
-      const url = `/sales/${saleId}`;
+      const url = `/sms2/sales/${saleId}`;
       await apiCall(url, "DELETE");
 
       updateState({
@@ -1211,7 +1211,7 @@ export default function SalesEntry() {
 
               {/* 2. Item Select */}
               <div className="flex flex-col flex-1 min-w-0"> {/* flex-1 to grow/shrink */}
-           <Select id="item_code_select" ref={refs.itemCodeSelect} value={formData.item_code ? { value: formData.item_code, label: `${formData.item_name} (${formData.item_code})`, item: { no: formData.item_code, type: formData.item_name, pack_due: formData.pack_due } } : null} onChange={handleItemSelect} options={initialData.items.filter(item => { if (!state.itemSearchInput) return true; const search = state.itemSearchInput.toLowerCase(); return String(item.no).toLowerCase().startsWith(search) || String(item.type).toLowerCase().includes(search); }).map(item => ({ value: item.no, label: `${item.type} (${item.no})`, item }))} onInputChange={inputValue => updateState({ itemSearchInput: inputValue.toUpperCase() })} inputValue={state.itemSearchInput} onKeyDown={e => handleKeyDown(e, 4)} placeholder="-- Select Item --" isClearable={false} isSearchable className="rounded-xl font-bold text-lg w-[310px] -ml-[90px]" styles={{ control: base => ({ ...base, minHeight: "42px", height: "42px", borderRadius: "0.75rem" }), valueContainer: base => ({ ...base, padding: "0 8px", height: "42px", flex: 1, display: "flex", alignItems: "center", overflow: "hidden", textTransform: "uppercase" }), input: base => ({ ...base, textTransform: "uppercase" }), placeholder: base => ({ ...base, fontSize: "1rem" }), menuList: base => ({ ...base, maxHeight: "300px" }) }} />
+           <Select id="item_code_select" ref={refs.itemCodeSelect} value={formData.item_code ? { value: formData.item_code, label: `${formData.item_name} (${formData.item_code})`, item: { no: formData.item_code, type: formData.item_name, pack_due: formData.pack_due } } : null} onChange={handleItemSelect} options={initialData.items.filter(item => { if (!state.itemSearchInput) return true; const search = state.itemSearchInput.toLowerCase(); return String(item.no).toLowerCase().startsWith(search) || String(item.type).toLowerCase().includes(search); }).map(item => ({ value: item.no, label: `${item.type} (${item.no})`, item }))} onInputChange={inputValue => updateState({ itemSearchInput: inputValue.toUpperCase() })} inputValue={state.itemSearchInput} onKeyDown={e => handleKeyDown(e, 4)} placeholder="-- Select Item --" isClearable={false} isSearchable className="rounded-xl font-bold text-lg w-[200px] -ml-[40px]" styles={{ control: base => ({ ...base, minHeight: "42px", height: "42px", borderRadius: "0.75rem" }), valueContainer: base => ({ ...base, padding: "0 8px", height: "42px", flex: 1, display: "flex", alignItems: "center", overflow: "hidden", textTransform: "uppercase" }), input: base => ({ ...base, textTransform: "uppercase" }), placeholder: base => ({ ...base, fontSize: "1rem" }), menuList: base => ({ ...base, maxHeight: "300px" }) }} />
                 <span className="text-sm mt-1 text-center invisible">Placeholder</span> {/* Added for alignment */}
               </div>
               
